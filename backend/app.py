@@ -1,17 +1,16 @@
-from flask import Flask, send_from_directory  # ← เพิ่ม send_from_directory
+from flask import Flask, send_from_directory
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from mongoengine import connect
 from config import Config
 
-# ✅ Import models ที่ใช้ ReferenceField เพื่อป้องกัน NotRegistered
+# ✅ Import models that use ReferenceField to prevent NotRegistered
 from models import User, Product, CartItem, Order, Note
 
 # ✅ Import Blueprints
 from routes.auth import auth
 from routes.notes import notes
-from flask import send_from_directory
-
+from routes.seller import seller # <-- Imported the seller blueprint
 
 def create_app():
     app = Flask(__name__)
@@ -30,12 +29,18 @@ def create_app():
     # ✅ Register Blueprints
     app.register_blueprint(auth, url_prefix="/api")
     app.register_blueprint(notes, url_prefix="/api")
+    app.register_blueprint(seller, url_prefix="/api") # <-- Registered the seller blueprint
 
-    # ✅ เสิร์ฟไฟล์โปรไฟล์จาก static/uploads/
+    # ✅ Serve profile files from static/uploads/
     @app.route('/static/uploads/<path:filename>')
     def serve_uploaded_file(filename):
         return send_from_directory('static/uploads', filename)
-    
+
+    # ✅ Serve product images from uploads/products/
+    @app.route('/uploads/products/<path:filename>')
+    def serve_product_image(filename):
+        return send_from_directory('uploads/products', filename)
+
     return app
 
 if __name__ == "__main__":
