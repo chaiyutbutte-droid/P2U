@@ -38,6 +38,9 @@ class User(Document):
     addresses = ListField(EmbeddedDocumentField(Address))
 
     is_seller = BooleanField(default=False)
+    # ✅ เพิ่มฟิลด์ shop_name เพื่อเก็บชื่อร้านของผู้ขาย
+    shop_name = StringField()
+    
     is_active = BooleanField(default=True)
     is_verified = BooleanField(default=False)
     created_at = DateTimeField(default=datetime.utcnow)
@@ -66,26 +69,3 @@ class Order(Document):
     status = StringField(default='pending')
     created_at = DateTimeField(default=datetime.utcnow)
     meta = {'collection': 'orders'}
-
-
-# -------- Note Model --------
-class Note(Document):
-    title = StringField(required=True)
-    content = StringField(default='')
-    image_url = StringField(default=None)
-    created_at = DateTimeField(default=datetime.utcnow)
-    user = ReferenceField('User', required=True, reverse_delete_rule=CASCADE)
-    meta = {'collection': 'notes'}
-
-
-# -------- Favorite Model --------
-class Favorite(Document):
-    user = ReferenceField('User', required=True, unique=True, reverse_delete_rule=CASCADE)
-    notes = ListField(ReferenceField('Note'))
-    meta = {'collection': 'favorites'}
-
-
-# ลงทะเบียน cascade delete rule
-User.register_delete_rule(Note, 'user', CASCADE)
-User.register_delete_rule(Favorite, 'user', CASCADE)
-

@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 max-w-md mx-auto bg-gray-900 rounded-xl shadow-lg text-white relative">
+  <div class="p-6 max-w-2xl mx-auto bg-gray-900 rounded-xl shadow-lg text-white relative">
     <div class="flex items-center justify-center mb-6 relative">
       <button
         @click="goBack"
@@ -37,29 +37,50 @@
         />
       </div>
 
-      <div class="space-y-3">
-        <p><span class="font-semibold text-indigo-400">Username:</span> {{ user.username }}</p>
-        <p><span class="font-semibold text-indigo-400">Full Name:</span> {{ user.full_name }}</p>
-        <p><span class="font-semibold text-indigo-400">Email:</span> {{ user.email }}</p>
-        <p><span class="font-semibold text-indigo-400">Phone:</span> {{ user.phone_number }}</p>
-        <p><span class="font-semibold text-indigo-400">Seller:</span> {{ user.is_seller ? 'Yes' : 'No' }}</p>
-      </div>
+      <div class="flex flex-col md:flex-row md:space-x-8 space-y-5 md:space-y-0">
+        <div class="space-y-3 md:w-1/2">
+          <p><span class="font-semibold text-indigo-400">Username:</span> {{ user.username }}</p>
+          <p><span class="font-semibold text-indigo-400">Full Name:</span> {{ user.full_name }}</p>
+          <p><span class="font-semibold text-indigo-400">Email:</span> {{ user.email }}</p>
+          <p><span class="font-semibold text-indigo-400">Phone:</span> {{ user.phone_number }}</p>
+          
+          <div class="flex items-center space-x-2">
+            <span class="font-semibold text-indigo-400">Seller:</span>
+            <span>{{ user.is_seller ? 'Registered' : 'Not Registered' }}</span>
+            <button
+              v-if="user.is_seller"
+              @click="router.push('/seller')"
+              class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition"
+            >
+              Go to Seller Page
+            </button>
 
-      <div v-if="user.addresses && user.addresses.length" class="mt-6">
-        <h2 class="text-xl font-semibold mb-2 border-b border-gray-700 pb-1">Addresses</h2>
-        <ul class="space-y-2 text-gray-300">
-          <li
-            v-for="(addr, index) in user.addresses"
-            :key="index"
-            class="bg-gray-800 rounded-md p-3 shadow-inner"
-          >
-            <p><span class="font-semibold text-indigo-400">Name:</span> {{ addr.name }}</p>
-            <p><span class="font-semibold text-indigo-400">Phone:</span> {{ addr.phone }}</p>
-            <p><span class="font-semibold text-indigo-400">Address:</span> {{ addr.address_line }}, {{ addr.district }}, {{ addr.province }}, {{ addr.postal_code }}</p>
-          </li>
-        </ul>
-      </div>
+            <button
+              v-else
+              @click="router.push('/Registerseller')"
+              class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition"
+            >
+              Register as Seller
+            </button>
+          </div>
+          </div>
 
+        <div v-if="user.addresses && user.addresses.length" class="mt-6 md:mt-0 md:w-1/2">
+          <h2 class="text-xl font-semibold mb-2 border-b border-gray-700 pb-1">Addresses</h2>
+          <ul class="space-y-2 text-gray-300">
+            <li
+              v-for="(addr, index) in user.addresses"
+              :key="index"
+              class="bg-gray-800 rounded-md p-3 shadow-inner"
+            >
+              <p><span class="font-semibold text-indigo-400">Name:</span> {{ addr.name }}</p>
+              <p><span class="font-semibold text-indigo-400">Phone:</span> {{ addr.phone }}</p>
+              <p><span class="font-semibold text-indigo-400">Address:</span> {{ addr.address_line }}, {{ addr.district }}, {{ addr.province }}, {{ addr.postal_code }}</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
       <button
         @click="handleLogout"
         class="mt-8 w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition"
@@ -75,7 +96,6 @@
     <p v-if="errorMsg" class="text-red-400 text-center mt-4">{{ errorMsg }}</p>
     <p v-if="successMsg" class="text-green-400 text-center mt-4">{{ successMsg }}</p>
 
-    <!-- 🔍 Modal พรีวิวรูป -->
     <div v-if="previewImageUrl" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
       <div class="bg-white p-6 rounded-lg max-w-sm w-full text-center text-black shadow-xl">
         <h2 class="text-xl font-bold mb-4">Preview Image</h2>
@@ -100,6 +120,7 @@
 </template>
 
 <script setup>
+// โค้ดส่วน script ไม่มีการเปลี่ยนแปลง
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'

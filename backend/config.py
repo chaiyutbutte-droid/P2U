@@ -2,6 +2,6 @@ class Config:
     SECRET_KEY = 'your-secret-key'
     JWT_SECRET_KEY = 'your-jwt-secret'
     MONGODB_SETTINGS = {
-        'db': 'mario_notes',
+        'db': 'P2Ukaiser',
         'host': 'mongodb://loeitech_admin_2:G7#u4sK!8zWb@202.29.231.188:27019/?authSource=admin'
     }
