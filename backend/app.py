@@ -7,7 +7,7 @@ from config import Config
 
 # ✅ Import models that use ReferenceField to prevent NotRegistered
 
-from models import User, Product, CartItem, Order, Note
+from models import User, Product, CartItem, Order
 
 #  Import Blueprints
 from routes.auth import auth
