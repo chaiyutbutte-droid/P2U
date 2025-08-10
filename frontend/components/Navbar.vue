@@ -1,5 +1,7 @@
 <template>
-  <nav class="bg-black text-white px-6 py-4 flex items-center shadow-md relative ">
+
+  <nav v-if="!hideNavbar" class="bg-black text-white px-6 py-4 flex items-center shadow-md relative ">
+
     <!-- ชื่อแอป -->
     <NuxtLink to="/dashboard" class="font-bold text-2xl hover:text-gray-300 transition flex-shrink-0">
       P2UKAISER
@@ -58,11 +60,21 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'  // เพิ่ม useRoute ด้วย
+
+const route = useRoute()  // เพิ่มบรรทัดนี้เพื่อดึง path ปัจจุบัน
+
 
 const router = useRouter()
 const user = ref(null)
 const showSettings = ref(false)
+
+// ซ่อนถ้าหน้าเป็น login หรือ register
+const hideNavbar = computed(() => {
+  const hiddenPages = ['/login', '/register']
+  return hiddenPages.includes(route.path)
+})
+
 
 function loadUser() {
   const storedUser = localStorage.getItem('user')
