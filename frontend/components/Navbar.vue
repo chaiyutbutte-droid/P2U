@@ -1,18 +1,35 @@
 <template>
-  <nav class="bg-black text-white px-6 py-4 flex items-center shadow-md relative">
+  <nav class="bg-gradient-to-r from-black to-pink-950 text-white px-6 py-4 flex items-center shadow-md relative">
     <!-- ชื่อแอป -->
-    <NuxtLink to="/dashboard" class="font-bold text-2xl hover:text-gray-300 transition flex-shrink-0">
-      P2UKAISER
+    <NuxtLink 
+      to="/dashboard" 
+      class="font-bold text-2xl flex-shrink-0 transition transform hover:scale-110"
+    >
+      <span class="text-white transition-colors duration-300">P2U</span>
+      <span class="text-pink-500 transition-colors duration-300">KAISER</span>
     </NuxtLink>
 
     <div class="ml-auto flex items-center gap-4 relative">
   
+      <!-- รูปโปรไฟล์ -->
+      <NuxtLink
+        v-if="user"
+        to="/profile"
+        class="w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:scale-105 transition"
+        title="My Profile"
+      >
+        <img
+          :src="profileImageUrl"
+          alt="Profile"
+          class="w-full h-full object-cover"
+        />
+      </NuxtLink>
 
-      <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
+            <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
       <div v-if="user" class="relative">
         <button
           @click="toggleSettings"
-          class="text-white hover:text-gray-400 text-xl"
+          class="text-white hover:scale-110 text-xl"
           title="Settings"
         >
           ⚙️
@@ -30,19 +47,6 @@
         </div>
       </div>
 
-      <!-- รูปโปรไฟล์ -->
-      <NuxtLink
-        v-if="user"
-        to="/profile"
-        class="w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:scale-105 transition"
-        title="My Profile"
-      >
-        <img
-          :src="profileImageUrl"
-          alt="Profile"
-          class="w-full h-full object-cover"
-        />
-      </NuxtLink>
 
       <!-- ปุ่ม Login ถ้าไม่ได้ล็อกอิน -->
       <NuxtLink
