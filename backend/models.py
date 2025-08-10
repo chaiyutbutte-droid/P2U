@@ -32,6 +32,9 @@ class User(Document):
     addresses = ListField(EmbeddedDocumentField(Address))
 
     is_seller = BooleanField(default=False)
+    # ✅ เพิ่มฟิลด์ shop_name เพื่อเก็บชื่อร้านของผู้ขาย
+    shop_name = StringField() 
+    
     is_active = BooleanField(default=True)
     is_verified = BooleanField(default=False)
     created_at = DateTimeField(default=datetime.utcnow)

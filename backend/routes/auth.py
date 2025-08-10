@@ -22,7 +22,9 @@ def register():
     password = request.form.get('password')
     full_name = request.form.get('full_name')
     phone_number = request.form.get('phone_number')
-    is_seller = request.form.get('is_seller', 'false').lower() == 'true'
+
+    # ลบ is_seller ออกจาก form data ที่นี่
+    # is_seller = request.form.get('is_seller', 'false').lower() == 'true'
 
     address_name = request.form.get('address_name')
     address_phone = request.form.get('address_phone')
@@ -75,7 +77,7 @@ def register():
             password=hashed_pw,
             full_name=full_name,
             phone_number=phone_number,
-            is_seller=is_seller,
+            is_seller=False, # ตั้งค่า is_seller เป็น False เสมอ
             profile_image_url=profile_image_url,
             addresses=addresses
         )
@@ -84,6 +86,58 @@ def register():
         return jsonify({"msg": str(e)}), 400
 
     return jsonify({"msg": "User registered successfully"}), 201
+
+# -----------------------------
+# ✅ Register as Seller
+# -----------------------------
+@auth.route('/register-seller', methods=['POST'])
+@jwt_required()
+def register_seller():
+    user_id = get_jwt_identity()
+    user = User.objects(id=ObjectId(user_id)).first()
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if user.is_seller:
+        return jsonify({"msg": "User is already a seller"}), 400
+
+    data = request.get_json()
+    shop_name = data.get('shop_name')
+    full_name = data.get('full_name')
+    phone_number = data.get('phone_number')
+
+    address_name = data.get('address_name')
+    address_phone = data.get('address_phone')
+    address_line = data.get('address_line')
+    district = data.get('district')
+    province = data.get('province')
+    postal_code = data.get('postal_code')
+    
+    if not all([shop_name, full_name, address_line, district, province, postal_code]):
+        return jsonify({"msg": "Required seller information is missing"}), 400
+
+    new_address = Address(
+        name=address_name or full_name,
+        phone=address_phone or phone_number,
+        address_line=address_line,
+        district=district,
+        province=province,
+        postal_code=postal_code,
+        is_default=True
+    )
+    
+    try:
+        user.is_seller = True
+        user.shop_name = shop_name
+        user.full_name = full_name
+        user.phone_number = phone_number
+        user.addresses.append(new_address)
+        user.save()
+        
+        return jsonify({"msg": "Seller registration successful"}), 200
+    except Exception as e:
+        return jsonify({"msg": f"An error occurred: {str(e)}"}), 500
 
 
 # -----------------------------
@@ -118,10 +172,10 @@ def login():
             "email": user.email,
             "full_name": user.full_name,
             "profile_image_url": user.profile_image_url or "",
-            "is_seller": user.is_seller
+            "is_seller": user.is_seller,
+            "shop_name": user.shop_name if user.is_seller else None
         }
     }), 200
-
 
 # -----------------------------
 # ✅ Profile
@@ -146,6 +200,7 @@ def profile():
         "phone_number": user.phone_number,
         "profile_image_url": user.profile_image_url or "",
         "is_seller": user.is_seller,
+        "shop_name": user.shop_name if user.is_seller else None,
         "addresses": [
             {
                 "name": addr.name,
@@ -158,7 +213,6 @@ def profile():
             } for addr in user.addresses
         ]
     }), 200
-
 
 # -----------------------------
 # ✅ Update Profile Image
