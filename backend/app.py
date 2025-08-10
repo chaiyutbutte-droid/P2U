@@ -4,31 +4,31 @@ from flask_cors import CORS
 from mongoengine import connect
 from config import Config
 
+
 # ✅ Import models that use ReferenceField to prevent NotRegistered
+
 from models import User, Product, CartItem, Order, Note
 
-# ✅ Import Blueprints
+#  Import Blueprints
 from routes.auth import auth
-from routes.notes import notes
 from routes.seller import seller # <-- Imported the seller blueprint
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # ✅ Setup Extensions
+    #  Setup Extensions
     CORS(app)
     JWTManager(app)
 
-    # ✅ MongoDB Connection
+    #  MongoDB Connection
     connect(
         db=app.config["MONGODB_SETTINGS"]["db"],
         host=app.config["MONGODB_SETTINGS"]["host"]
     )
 
-    # ✅ Register Blueprints
+    #  Register Blueprints
     app.register_blueprint(auth, url_prefix="/api")
-    app.register_blueprint(notes, url_prefix="/api")
     app.register_blueprint(seller, url_prefix="/api") # <-- Registered the seller blueprint
 
     # ✅ Serve profile files from static/uploads/
