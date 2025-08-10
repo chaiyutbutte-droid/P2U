@@ -1,5 +1,5 @@
 <template>
-  <nav class="bg-black text-white px-6 py-4 flex items-center shadow-md relative">
+  <nav class="bg-black text-white px-6 py-4 flex items-center shadow-md relative ">
     <!-- ชื่อแอป -->
     <NuxtLink to="/dashboard" class="font-bold text-2xl hover:text-gray-300 transition flex-shrink-0">
       P2UKAISER
@@ -34,7 +34,7 @@
       <NuxtLink
         v-if="user"
         to="/profile"
-        class="w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:scale-105 transition"
+        class=" w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:scale-105 transition"
         title="My Profile"
       >
         <img
