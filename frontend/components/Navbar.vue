@@ -1,5 +1,7 @@
 <template>
   <nav class="bg-gradient-to-r from-black to-pink-950 text-white px-6 py-4 flex items-center shadow-md relative">
+
+
     <!-- ชื่อแอป -->
     <NuxtLink 
       to="/dashboard" 
@@ -47,6 +49,19 @@
         </div>
       </div>
 
+      <!-- รูปโปรไฟล์ -->
+      <NuxtLink
+        v-if="user"
+        to="/profile"
+        class=" w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:scale-105 transition"
+        title="My Profile"
+      >
+        <img
+          :src="profileImageUrl"
+          alt="Profile"
+          class="w-full h-full object-cover"
+        />
+      </NuxtLink>
 
       <!-- ปุ่ม Login ถ้าไม่ได้ล็อกอิน -->
       <NuxtLink
@@ -62,11 +77,21 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'  // เพิ่ม useRoute ด้วย
+
+const route = useRoute()  // เพิ่มบรรทัดนี้เพื่อดึง path ปัจจุบัน
+
 
 const router = useRouter()
 const user = ref(null)
 const showSettings = ref(false)
+
+// ซ่อนถ้าหน้าเป็น login หรือ register
+const hideNavbar = computed(() => {
+  const hiddenPages = ['/login', '/register']
+  return hiddenPages.includes(route.path)
+})
+
 
 function loadUser() {
   const storedUser = localStorage.getItem('user')

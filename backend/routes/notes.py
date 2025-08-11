@@ -1,121 +1,119 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import Note, User
-from mongoengine import Document, ReferenceField, ListField
-from bson import ObjectId
+from models import Note, User, Favorite
+from mongoengine.errors import DoesNotExist, ValidationError
 
-notes = Blueprint('notes', __name__)
+notes = Blueprint("notes", __name__)
 
-# --- Favorite Model ---
-class Favorite(Document):
-    user = ReferenceField(User, required=True, unique=True)
-    notes = ListField(ReferenceField(Note))
-
-# This function is no longer called by the refactored endpoints, but is kept for reference.
-def count_favorites_for_notes(note_ids):
-    counts = {}
-    for note_id in note_ids:
-        counts[note_id] = Favorite.objects(notes=ObjectId(note_id)).count()
-    return counts
-
-# 🔹 Get all notes of the current user
-@notes.route('/notes', methods=['GET'])
-@jwt_required()
-def get_notes():
-    return jsonify({"msg": "Data retrieval successful"})
-
-# 🔹 Create a new note
-@notes.route('/notes', methods=['POST'])
+# 📝 สร้าง Note ใหม่
+@notes.route("/notes", methods=["POST"])
 @jwt_required()
 def create_note():
     user_id = get_jwt_identity()
     data = request.get_json()
-    user = User.objects(id=ObjectId(user_id)).first()
+
+    try:
+        user = User.objects.get(id=user_id)
+    except DoesNotExist:
+        return jsonify({"error": "User not found"}), 404
 
     note = Note(
-        title=data['title'],
-        content=data.get('content', ''),
-        image_url=data.get('image_url', ''),
+        title=data.get("title"),
+        content=data.get("content", ""),
+        image_url=data.get("image_url", None),
         user=user
     )
     note.save()
+    return jsonify({"msg": "Note created successfully", "note_id": str(note.id)}), 201
 
-    return jsonify({"msg": "Note created!"})
 
-# 🔹 Update note by ID
-@notes.route('/notes/<note_id>', methods=['PUT'])
+# 📜 ดึง Note ทั้งหมดของผู้ใช้
+@notes.route("/notes", methods=["GET"])
+@jwt_required()
+def get_notes():
+    user_id = get_jwt_identity()
+    notes_list = Note.objects(user=user_id).order_by("-created_at")
+    return Response(notes_list.to_json(), mimetype="application/json"), 200
+
+
+# 🔍 ดึง Note ตาม ID
+@notes.route("/notes/<note_id>", methods=["GET"])
+@jwt_required()
+def get_note_by_id(note_id):
+    try:
+        note = Note.objects.get(id=note_id)
+    except DoesNotExist:
+        return jsonify({"error": "Note not found"}), 404
+    return Response(note.to_json(), mimetype="application/json"), 200
+
+
+# ✏️ แก้ไข Note
+@notes.route("/notes/<note_id>", methods=["PUT"])
 @jwt_required()
 def update_note(note_id):
+    user_id = get_jwt_identity()
     data = request.get_json()
-    update_data = {}
 
-    if 'title' in data:
-        update_data['title'] = data['title']
-    if 'content' in data:
-        update_data['content'] = data['content']
-    if 'image_url' in data:
-        update_data['image_url'] = data['image_url']
+    try:
+        note = Note.objects.get(id=note_id, user=user_id)
+    except DoesNotExist:
+        return jsonify({"error": "Note not found"}), 404
 
-    Note.objects(id=ObjectId(note_id)).update_one(**update_data)
-    return jsonify({"msg": "Note updated!"})
+    allowed_fields = {"title", "content", "image_url"}
+    update_data = {k: v for k, v in data.items() if k in allowed_fields}
 
-# 🔹 Delete note by ID
-@notes.route('/notes/<note_id>', methods=['DELETE'])
+    try:
+        note.update(**update_data)
+    except ValidationError as e:
+        return jsonify({"error": str(e)}), 400
+
+    return jsonify({"msg": "Note updated successfully"}), 200
+
+
+# 🗑 ลบ Note
+@notes.route("/notes/<note_id>", methods=["DELETE"])
 @jwt_required()
 def delete_note(note_id):
-    Note.objects(id=ObjectId(note_id)).delete()
-    return jsonify({"msg": "Note deleted!"})
+    user_id = get_jwt_identity()
 
-# 🔹 Search for notes by the current user
-@notes.route('/notes/search', methods=['GET'])
+    try:
+        note = Note.objects.get(id=note_id, user=user_id)
+    except DoesNotExist:
+        return jsonify({"error": "Note not found"}), 404
+
+    note.delete()
+    return jsonify({"msg": "Note deleted successfully"}), 200
+
+
+# ⭐ เพิ่ม Note เข้า Favorite
+@notes.route("/favorites/<note_id>", methods=["POST"])
 @jwt_required()
-def search_notes():
-    query = request.args.get('q', '').strip()
-    if not query:
-        return jsonify({"msg": "Please provide a search query."}), 400
+def add_to_favorites(note_id):
+    user_id = get_jwt_identity()
 
-    return jsonify({"msg": "Data retrieval successful"})
+    try:
+        user = User.objects.get(id=user_id)
+        note = Note.objects.get(id=note_id)  # ไม่จำเป็นต้องเป็นเจ้าของ note
+    except DoesNotExist:
+        return jsonify({"error": "Note not found"}), 404
 
-# 🔹 Get all notes from all users
-@notes.route('/notes/all', methods=['GET'])
-@jwt_required()
-def get_all_notes():
-    return jsonify({"msg": "Data retrieval successful"})
+    favorite, created = Favorite.objects.get_or_create(user=user)
+    if note not in favorite.notes:
+        favorite.notes.append(note)
+        favorite.save()
 
-# 🔹 Search all notes from all users
-@notes.route('/notes/all/search', methods=['GET'])
-@jwt_required()
-def search_all_notes():
-    query = request.args.get('q', '').strip()
-    if not query:
-        return jsonify({"msg": "Please provide a search query."}), 400
+    return jsonify({"msg": "Note added to favorites"}), 200
 
-    return jsonify({"msg": "Data retrieval successful"})
 
-# 🔹 Get favorite notes of the current user
-@notes.route('/favorites', methods=['GET'])
+# 📜 ดึง Favorite Notes
+@notes.route("/favorites", methods=["GET"])
 @jwt_required()
 def get_favorites():
-    return jsonify({"msg": "Data retrieval successful"})
-
-# 🔹 Toggle favorite note of the current user
-@notes.route('/favorites/<note_id>', methods=['POST'])
-@jwt_required()
-def toggle_favorite(note_id):
     user_id = get_jwt_identity()
-    user = User.objects(id=ObjectId(user_id)).first()
-    favorite = Favorite.objects(user=user).first()
-    note = Note.objects(id=ObjectId(note_id)).first()
-    if not note:
-        return jsonify({"msg": "Note not found"}), 404
 
-    if not favorite:
-        favorite = Favorite(user=user, notes=[])
+    try:
+        favorite = Favorite.objects.get(user=user_id)
+    except DoesNotExist:
+        return jsonify([]), 200
 
-    if any(str(n.id) == str(note.id) for n in favorite.notes):
-        favorite.notes = [n for n in favorite.notes if str(n.id) != str(note.id)]
-    else:
-        favorite.notes.append(note)
-
-    favorite.save()
-    return jsonify({"msg": "Favorite updated"})
+    return Response(favorite.notes.to_json(), mimetype="application/json"), 200

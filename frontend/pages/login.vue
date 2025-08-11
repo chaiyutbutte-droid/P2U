@@ -1,60 +1,43 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen p-4" style="background-image: url('https://wallpapercave.com/wp/wp10855314.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
-    <div class="w-full max-w-sm rounded-3xl bg-gray-800/50 p-8 shadow-2xl backdrop-blur-sm transition-all duration-300 hover:bg-gray-800/70 hover:shadow-gray-700/50">
-      <h1 class="mb-2 text-center font-serif text-3xl font-bold text-white drop-shadow-md">Welcome to P2UKaiser</h1>
-      <p class="mb-8 text-center text-gray-400">Sign in to your account</p>
+  <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black " style="background-image: url(https://wallpapers-clan.com/wp-content/uploads/2024/03/nezuko-glowing-eyes-demon-slayer-gif-desktop-wallpaper-preview.gif);">
+    <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl w-full max-w-sm">
+      <h1 class="text-2xl font-bold text-white text-center font-serif">Welcome to</h1>
+      <h1 class="text-2xl font-bold text-pink-500 text-center font-serif">P2UKaoser</h1>
+      <p class="text-sm text-gray-400 text-center mb-6 mt-2">Sign in to your account</p>
 
-      <div class="space-y-4">
-        <div class="relative">
+      <div class="flex flex-col">
+        <label for="" class="text-white ms-3">Username</label>
           <input
             v-model="username"
-            placeholder=" "
-            id="username"
-            class="peer block w-full rounded-lg border border-white/10 bg-gray-700 p-4 text-white placeholder-transparent ring-white/20 transition-all duration-300 focus:border-white focus:outline-none focus:ring-2 invalid:border-red-500 valid:border-green-500"
+            placeholder="Username"
+            class="input-style  bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
             autocomplete="username"
           />
-          <label
-            for="username"
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-all duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-white peer-valid:-top-3.5 peer-valid:text-sm peer-valid:text-white"
-          >
-            Username
-          </label>
-        </div>
 
-        <div class="relative mt-6">
+        <label for="" class="text-white ms-3">Password</label>
           <input
             v-model="password"
             type="password"
-            placeholder=" "
-            id="password"
-            class="peer block w-full rounded-lg border border-white/10 bg-gray-700 p-4 text-white placeholder-transparent ring-white/20 transition-all duration-300 focus:border-white focus:outline-none focus:ring-2 invalid:border-red-500 valid:border-green-500"
+            placeholder="Password"
+            class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:border-4 focus:outline-none focus:border-pink-600"
             autocomplete="current-password"
           />
-          <label
-            for="password"
-            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-all duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-white peer-valid:-top-3.5 peer-valid:text-sm peer-valid:text-white"
-          >
-            Password
-          </label>
-        </div>
       </div>
-
+      
       <button
         @click="handleLogin"
-        class="mt-6 w-full rounded-lg border border-white/20 bg-gray-900 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900"
+        class="bg-pink-600 hover:bg-pink-500 text-white font-semibold py-2 w-full rounded-lg transition duration-200 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:border-white mt-4"
       >
         Log In
       </button>
 
-      <p v-if="errorMsg" class="mt-4 text-center text-sm text-red-400">
+      <p v-if="errorMsg" class="text-red-400 text-sm mt-4 text-center">
         {{ errorMsg }}
       </p>
 
-      <div class="mt-8 text-center text-sm text-gray-400">
+      <div class="text-center text-sm text-gray-400 mt-4">
         Don’t have an account?
-        <router-link to="/register" class="font-medium text-white underline decoration-2 decoration-white/50 underline-offset-4 transition-colors duration-300 hover:text-white hover:decoration-white">
-          Register here
-        </router-link>
+        <router-link to="/register" class="text-white underline hover:text-sky-500">Register here</router-link>
       </div>
     </div>
   </div>
@@ -107,5 +90,8 @@ const handleLogin = async () => {
 </script>
 
 <style lang="postcss" scoped>
-/* You can add custom styles here if needed, but Tailwind CSS handles most of the styling. */
+.input-style {
+  @apply mb-4 p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-white focus:border-white;
+}
 </style>
