@@ -1,121 +1,74 @@
 <template>
-  <div class="bg-gray-900 text-white min-h-screen px-4 py-6">
-    <!-- Header -->
-    <header class="flex justify-between items-center mb-8">
-      <h1 class="text-2xl font-bold">🛒 SecondHand Market</h1>
-      <div class="flex items-center space-x-4">
-        <input
-          v-model="search"
-          @input="debouncedSearch"
-          type="text"
-          placeholder="Search products..."
-          class="px-3 py-1.5 rounded bg-gray-800 border border-gray-700 focus:outline-none"
-        />
-        <button class="btn-black" @click="goToCart">🛍 Cart ({{ cart.length }})</button>
+  <div class="flex min-h-screen bg-gray-900 text-white">
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <!-- Products -->
+      <div v-if="activeTab === 'products'">
+        <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+        <div v-if="allProducts.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div
+            v-for="product in allProducts"
+            :key="product.id"
+            class="bg-gray-800 rounded-lg shadow-md p-4"
+          >
+            <img
+              :src="product.image_url || defaultImage"
+              class="w-full h-40 object-cover rounded mb-3"
+            />
+            <h3 class="font-semibold">{{ product.name }}</h3>
+            <p class="text-sm text-gray-400">{{ product.description }}</p>
+            <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
+            <!-- แสดงชื่อร้านและผู้ขาย -->
+            <p class="text-sm text-gray-400 mt-1">
+              Seller: {{ product.seller.username }} | Shop: {{ product.seller.shop_name || 'N/A' }}
+            </p>
+          </div>
+        </div>
+        <p v-else class="text-gray-400 mt-16 text-center">🔍 No products found.</p>
       </div>
-    </header>
 
-    <!-- Product Grid -->
-    <div v-if="filteredProducts.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      <div
-        v-for="product in filteredProducts"
-        :key="product.id"
-        class="bg-gray-800 rounded-lg overflow-hidden shadow-md p-4 relative note-hover-effect"
-      >
-        <img
-          :src="product.image || defaultImage"
-          alt="product"
-          class="w-full h-48 object-cover rounded mb-3"
-        />
-        <h2 class="text-lg font-semibold">{{ product.title }}</h2>
-        <p class="text-sm text-gray-400 truncate">{{ product.description }}</p>
-        <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
-        <button
-          class="mt-3 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded transition"
-          @click="addToCart(product)"
-        >
-          Add to Cart
-        </button>
+      <!-- Orders -->
+      <div v-if="activeTab === 'orders'">
+        <h2 class="text-xl font-bold mb-4">📦 Orders</h2>
+        <p class="text-gray-400">ยังไม่มีคำสั่งซื้อ</p>
       </div>
-    </div>
 
-    <p v-else class="text-center text-gray-500 mt-16">🔍 No products found.</p>
+      <!-- Profile -->
+      <div v-if="activeTab === 'profile'">
+        <h2 class="text-xl font-bold mb-4">👤 Profile</h2>
+        <p class="text-gray-400">ข้อมูลผู้ใช้จะแสดงตรงนี้</p>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-const defaultImage = '/default-item.jpg' // ใส่ภาพ fallback ถ้าไม่มีภาพสินค้า
-const search = ref('')
-const timeout = ref(null)
+const activeTab = ref("products");
+const defaultImage = "/default-item.jpg";
+const allProducts = ref([]);
 
-const allProducts = ref([
-  {
-    id: 1,
-    title: 'Used iPhone 12',
-    description: 'Secondhand in great condition',
-    price: 14500,
-    image: 'https://via.placeholder.com/300x200',
-  },
-  {
-    id: 2,
-    title: 'Office Chair - Like New',
-    description: 'Comfortable and adjustable',
-    price: 900,
-    image: 'https://via.placeholder.com/300x200',
-  },
-  {
-    id: 3,
-    title: 'Gaming Laptop',
-    description: 'High spec, perfect for games and work',
-    price: 20000,
-    image: 'https://via.placeholder.com/300x200',
-  },
-])
+// ดึงสินค้าทุกตัวจาก public API
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get("http://localhost:5000/api/products");
+    // แปลงข้อมูลให้ตรงกับ property ที่ใช้ใน template
+    allProducts.value = res.data.map(p => ({
+      id: p.id || p._id,
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      image_url: p.image_url || defaultImage,
+      seller: p.seller || { username: "Unknown", shop_name: "" } // fallback ถ้าไม่มี seller
+    }));
+  } catch (err) {
+    console.error("Failed to fetch products:", err);
+  }
+};
 
-const cart = ref([])
-
-const filteredProducts = computed(() => {
-  const q = search.value.toLowerCase().trim()
-  return q
-    ? allProducts.value.filter((p) =>
-        p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
-      )
-    : allProducts.value
-})
-
-const debouncedSearch = () => {
-  clearTimeout(timeout.value)
-  timeout.value = setTimeout(() => {
-    // trigger computed
-  }, 300)
-}
-
-const addToCart = (product) => {
-  cart.value.push(product)
-}
-
-const goToCart = () => {
-  alert('Go to cart page (to be implemented)')
-}
+onMounted(() => {
+  fetchProducts();
+});
 </script>
-
-<style scoped>
-.btn-black {
-  background-color: #000;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  border: 1px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.btn-black:hover {
-  background-color: #222;
-  color: #a3a3a3;
-  border-color: #555;
-}
-</style>
