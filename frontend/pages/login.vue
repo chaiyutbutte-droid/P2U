@@ -7,21 +7,21 @@
 
       <div class="flex flex-col">
         <label for="" class="text-white ms-3">Username</label>
-          <input
-            v-model="username"
-            placeholder="Username"
-            class="input-style  bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
-            autocomplete="username"
-          />
+        <input
+          v-model="username"
+          placeholder="Username"
+          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
+          autocomplete="username"
+        />
 
         <label for="" class="text-white ms-3">Password</label>
-          <input
-            v-model="password"
-            type="password"
-            placeholder="Password"
-            class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:border-4 focus:outline-none focus:border-pink-600"
-            autocomplete="current-password"
-          />
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Password"
+          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:border-4 focus:outline-none focus:border-pink-600"
+          autocomplete="current-password"
+        />
       </div>
       
       <button
@@ -68,6 +68,12 @@ const handleLogin = async () => {
 
     const user = res.data.user;
 
+    // ✅ กรณีที่ล็อกอินสำเร็จ แต่ Backend ส่งสถานะ is_email_verified = false กลับมา
+    if (user && !user.is_email_verified) {
+      router.push({ name: 'VerifyEmail', query: { email: user.email } });
+      return;
+    }
+
     localStorage.setItem('token', res.data.access_token);
 
     if (user) {
@@ -82,9 +88,33 @@ const handleLogin = async () => {
       window.dispatchEvent(new Event('user-updated'));
     }
 
+    console.log('Login successful. Redirecting to dashboard.');
     router.push('/dashboard');
+
   } catch (err) {
-    errorMsg.value = err.response?.data?.msg || 'Login failed. Please try again.';
+    console.error('[Login error]', err.response?.data?.msg || err.message);
+    
+    // ✅ ส่วนนี้คือการจัดการ Error ที่ Backend บอกว่า "Please verify your email before logging in"
+    // โค้ดจะพยายามดึงอีเมลจาก username เพื่อเปลี่ยนเส้นทางไปยังหน้ายืนยัน
+    if (err.response?.status === 403 && err.response?.data?.msg === 'Please verify your email before logging in') {
+      errorMsg.value = err.response.data.msg;
+      try {
+        const userEmailRes = await axios.post('http://localhost:5000/api/check-email-from-username', { 
+            username: username.value 
+        });
+
+        if (userEmailRes.data.email) {
+          router.push({ name: 'VerifyEmail', query: { email: userEmailRes.data.email } });
+        }
+      } catch (checkErr) {
+        console.error('[Check Email error]', checkErr);
+        // แสดงข้อความ Error นี้เมื่อไม่สามารถดึงอีเมลจาก username ได้
+        errorMsg.value = 'Could not find user email. Please try registering again.';
+      }
+    } else {
+      // สำหรับข้อผิดพลาดอื่นๆ ที่ไม่ใช่เรื่องการยืนยันอีเมล
+      errorMsg.value = err.response?.data?.msg || 'Login failed. Please try again.';
+    }
   }
 };
 </script>

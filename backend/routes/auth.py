@@ -1,16 +1,51 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask import Blueprint, request, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from mongoengine.errors import ValidationError
 from bson import ObjectId
 import os
 import uuid
+import random
+from datetime import datetime, timedelta
+
+# ✅ เพิ่ม import ที่จำเป็นสำหรับส่งอีเมล
+import smtplib
+import ssl
+from email.message import EmailMessage
+
+# ✅ เพิ่ม import ที่จำเป็นสำหรับ JWT
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 
 from models import User, Address
 
 auth = Blueprint('auth', __name__)
 UPLOAD_FOLDER = 'static/uploads'
+
+
+# Function to send email
+def send_verification_email(recipient_email, verification_code):
+    try:
+        sender_email = current_app.config['MAIL_USERNAME']
+        sender_password = current_app.config['MAIL_PASSWORD']
+        
+        # Email message setup
+        msg = EmailMessage()
+        msg['Subject'] = "Your Verification Code"
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+        msg.set_content(f"Hi there,\n\nYour verification code is: {verification_code}\n\nThis code is valid for 15 minutes.")
+        
+        # Connect to SMTP Server and send the email
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], current_app.config['MAIL_PORT'], context=context) as smtp:
+            smtp.login(sender_email, sender_password)
+            smtp.send_message(msg)
+        print(f"Email sent successfully to {recipient_email}")
+        return True
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        return False
+
 
 # -----------------------------
 # ✅ Register
@@ -22,17 +57,7 @@ def register():
     password = request.form.get('password')
     full_name = request.form.get('full_name')
     phone_number = request.form.get('phone_number')
-
-    # ลบ is_seller ออกจาก form data ที่นี่
-    # is_seller = request.form.get('is_seller', 'false').lower() == 'true'
-
-    address_name = request.form.get('address_name')
-    address_phone = request.form.get('address_phone')
-    address_line = request.form.get('address_line')
-    district = request.form.get('district')
-    province = request.form.get('province')
-    postal_code = request.form.get('postal_code')
-
+    
     profile_image = request.files.get('profile_image')
     profile_image_url = ""
 
@@ -57,18 +82,9 @@ def register():
         profile_image.save(save_path)
         profile_image_url = f"/{UPLOAD_FOLDER}/{new_filename}"
 
-    addresses = []
-    if address_line and district and province and postal_code:
-        addresses.append(Address(
-            name=address_name or full_name,
-            phone=address_phone or phone_number,
-            address_line=address_line,
-            district=district,
-            province=province,
-            postal_code=postal_code,
-            is_default=True
-        ))
-
+    verification_code = ''.join(random.choices('0123456789', k=6))
+    expiration_time = datetime.utcnow() + timedelta(minutes=15)
+    
     hashed_pw = generate_password_hash(password)
     try:
         user = User(
@@ -77,15 +93,119 @@ def register():
             password=hashed_pw,
             full_name=full_name,
             phone_number=phone_number,
-            is_seller=False, # ตั้งค่า is_seller เป็น False เสมอ
+            is_seller=False,
             profile_image_url=profile_image_url,
-            addresses=addresses
+            is_email_verified=False,
+            email_verification_token=verification_code,
+            email_verification_token_expiration=expiration_time
         )
         user.save()
     except ValidationError as e:
         return jsonify({"msg": str(e)}), 400
 
-    return jsonify({"msg": "User registered successfully"}), 201
+    send_verification_email(user.email, verification_code)
+    
+    return jsonify({"msg": "User registered successfully. Please check your email for the verification code."}), 201
+
+# -----------------------------
+# ✅ Verify Code
+# -----------------------------
+@auth.route('/verify-code', methods=['POST'])
+def verify_email_code():
+    data = request.get_json()
+    email = data.get('email')
+    code = data.get('code')
+
+    if not email or not code:
+        return jsonify({"msg": "Email and code are required"}), 400
+
+    user = User.objects(email=email).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if user.is_email_verified:
+        return jsonify({"msg": "Email is already verified"}), 200
+    
+    if user.email_verification_token == code and datetime.utcnow() < user.email_verification_token_expiration:
+        user.is_email_verified = True
+        user.email_verification_token = None
+        user.email_verification_token_expiration = None
+        user.save()
+        return jsonify({"msg": "Email verified successfully"}), 200
+    else:
+        return jsonify({"msg": "Invalid or expired verification code"}), 400
+
+# -----------------------------
+# ✅ Resend Code
+# -----------------------------
+@auth.route('/resend-verification-code', methods=['POST'])
+def resend_verification_code():
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({"msg": "Email is required"}), 400
+
+    user = User.objects(email=email).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if user.is_email_verified:
+        return jsonify({"msg": "Email is already verified"}), 200
+
+    new_code = ''.join(random.choices('0123456789', k=6))
+    new_expiration = datetime.utcnow() + timedelta(minutes=15)
+    
+    user.email_verification_token = new_code
+    user.email_verification_token_expiration = new_expiration
+    user.save()
+    
+    send_verification_email(user.email, new_code)
+
+    return jsonify({"msg": "A new verification code has been sent to your email."}), 200
+
+# -----------------------------
+# ✅ Login
+# -----------------------------
+@auth.route('/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+    except Exception:
+        return jsonify({"msg": "Invalid JSON"}), 400
+
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return jsonify({"msg": "Username and password are required"}), 400
+
+    user = User.objects(username=username).first()
+    if not user or not check_password_hash(user.password, password):
+        return jsonify({"msg": "Invalid credentials"}), 401
+    
+    # ✅ ส่วนที่แก้ไข: เพิ่มการตรวจสอบสถานะการยืนยันอีเมลกลับมา
+    if not user.is_email_verified:
+        return jsonify({"msg": "Please verify your email before logging in"}), 403
+
+    if not user.is_active:
+        return jsonify({"msg": "Account is inactive"}), 403
+    
+    # ต้องมีการกำหนดค่า JWT_SECRET_KEY ใน config.py
+    token = create_access_token(identity=str(user.id))
+    return jsonify({
+        "access_token": token,
+        "user": {
+            "id": str(user.id),
+            "username": user.username,
+            "email": user.email,
+            "full_name": user.full_name,
+            "profile_image_url": user.profile_image_url or "",
+            "is_seller": user.is_seller,
+            "is_email_verified": user.is_email_verified, # ✅ เพิ่ม field นี้เข้าไปใน response
+            "shop_name": user.shop_name if user.is_seller else None
+        }
+    }), 200
 
 # -----------------------------
 # ✅ Register as Seller
@@ -98,6 +218,10 @@ def register_seller():
 
     if not user:
         return jsonify({"msg": "User not found"}), 404
+
+    # Check if the email is verified before allowing seller registration
+    if not user.is_email_verified:
+        return jsonify({"msg": "Please verify your email before registering as a seller"}), 403
 
     if user.is_seller:
         return jsonify({"msg": "User is already a seller"}), 400
@@ -141,43 +265,6 @@ def register_seller():
 
 
 # -----------------------------
-# ✅ Login
-# -----------------------------
-@auth.route('/login', methods=['POST'])
-def login():
-    try:
-        data = request.get_json(force=True)
-    except Exception:
-        return jsonify({"msg": "Invalid JSON"}), 400
-
-    username = data.get('username')
-    password = data.get('password')
-
-    if not username or not password:
-        return jsonify({"msg": "Username and password are required"}), 400
-
-    user = User.objects(username=username).first()
-    if not user or not check_password_hash(user.password, password):
-        return jsonify({"msg": "Invalid credentials"}), 401
-
-    if not user.is_active:
-        return jsonify({"msg": "Account is inactive"}), 403
-
-    token = create_access_token(identity=str(user.id))
-    return jsonify({
-        "access_token": token,
-        "user": {
-            "id": str(user.id),
-            "username": user.username,
-            "email": user.email,
-            "full_name": user.full_name,
-            "profile_image_url": user.profile_image_url or "",
-            "is_seller": user.is_seller,
-            "shop_name": user.shop_name if user.is_seller else None
-        }
-    }), 200
-
-# -----------------------------
 # ✅ Profile
 # -----------------------------
 @auth.route('/profile', methods=['GET'])
@@ -201,6 +288,7 @@ def profile():
         "profile_image_url": user.profile_image_url or "",
         "is_seller": user.is_seller,
         "shop_name": user.shop_name if user.is_seller else None,
+        "is_email_verified": user.is_email_verified,
         "addresses": [
             {
                 "name": addr.name,
@@ -243,8 +331,6 @@ def update_profile_image():
     new_filename = f"{uuid.uuid4().hex}.{ext}"
     save_path = os.path.join(UPLOAD_FOLDER, new_filename)
     profile_image.save(save_path)
-
-    # Optionally, delete old image here if needed
 
     user.profile_image_url = f"/{UPLOAD_FOLDER}/{new_filename}"
     user.save()

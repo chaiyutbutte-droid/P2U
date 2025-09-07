@@ -4,32 +4,33 @@ from flask_cors import CORS
 from mongoengine import connect
 from config import Config
 
-
 # ✅ Import models that use ReferenceField to prevent NotRegistered
+from models import User, Product, CartItem, Order, Address  # เพิ่ม Address model เข้ามา
 
-from models import User, Product, CartItem, Order
-
-#  Import Blueprints
+# Import Blueprints
 from routes.auth import auth
-from routes.seller import seller # <-- Imported the seller blueprint
+from routes.seller import seller  # <-- Imported the seller blueprint
+from routes.product import product  # <-- เพิ่ม product blueprint ที่อาจจะจำเป็นในอนาคต
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    #  Setup Extensions
-    CORS(app)
+    # Setup Extensions
+    # ✅ เพิ่ม CORS(app, origins="*") เพื่ออนุญาตให้ทุกโดเมนสามารถเรียกใช้ API ได้
+    CORS(app, origins="*")
     JWTManager(app)
 
-    #  MongoDB Connection
+    # MongoDB Connection
     connect(
         db=app.config["MONGODB_SETTINGS"]["db"],
         host=app.config["MONGODB_SETTINGS"]["host"]
     )
 
-    #  Register Blueprints
+    # Register Blueprints
     app.register_blueprint(auth, url_prefix="/api")
-    app.register_blueprint(seller, url_prefix="/api") # <-- Registered the seller blueprint
+    app.register_blueprint(seller, url_prefix="/api")  # <-- Registered the seller blueprint
+    app.register_blueprint(product, url_prefix="/api")  # <-- Registered the product blueprint
 
     # ✅ Serve profile files from static/uploads/
     @app.route('/static/uploads/<path:filename>')

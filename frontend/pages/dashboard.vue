@@ -1,121 +1,199 @@
 <template>
-  <div class="bg-gray-900 text-white min-h-screen px-4 py-6">
-    <!-- Header -->
-    <header class="flex justify-between items-center mb-8">
-      <h1 class="text-2xl font-bold">🛒 SecondHand Market</h1>
-      <div class="flex items-center space-x-4">
-        <input
-          v-model="search"
-          @input="debouncedSearch"
-          type="text"
-          placeholder="Search products..."
-          class="px-3 py-1.5 rounded bg-gray-800 border border-gray-700 focus:outline-none"
-        />
-        <button class="btn-black" @click="goToCart">🛍 Cart ({{ cart.length }})</button>
-      </div>
-    </header>
-
-    <!-- Product Grid -->
-    <div v-if="filteredProducts.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      <div
-        v-for="product in filteredProducts"
-        :key="product.id"
-        class="bg-gray-800 rounded-lg overflow-hidden shadow-md p-4 relative note-hover-effect"
-      >
-        <img
-          :src="product.image || defaultImage"
-          alt="product"
-          class="w-full h-48 object-cover rounded mb-3"
-        />
-        <h2 class="text-lg font-semibold">{{ product.title }}</h2>
-        <p class="text-sm text-gray-400 truncate">{{ product.description }}</p>
-        <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
-        <button
-          class="mt-3 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded transition"
-          @click="addToCart(product)"
+  <div class="flex min-h-screen bg-gray-900 text-white relative">
+    <!-- Cart Icon -->
+    <div class="absolute top-4 right-6">
+      <button class="relative" @click="activeTab = 'profile'">
+        <span class="text-3xl">🛒</span>
+        <span
+          v-if="cart.length"
+          class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
         >
-          Add to Cart
+          {{ cart.reduce((sum, item) => sum + item.quantity, 0) }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <!-- Products Tab -->
+      <div v-if="activeTab === 'products'">
+        <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+
+        <div
+          v-if="allProducts.length"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
+        >
+          <div
+            v-for="product in allProducts"
+            :key="product.id"
+            class="bg-gray-800 rounded-lg shadow-md p-4 cursor-pointer hover:bg-gray-700 transition"
+            @click="openProduct(product)"
+          >
+            <img
+              :src="product.image_url || defaultImage"
+              class="w-full h-40 object-cover rounded mb-3"
+            />
+            <h3 class="font-semibold">{{ product.name }}</h3>
+            <p class="text-sm text-gray-400">{{ product.description }}</p>
+            <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
+            <p class="text-sm text-gray-400 mt-1">
+              Seller: {{ product.seller.username }} | Shop: {{ product.seller.shop_name || 'N/A' }}
+            </p>
+          </div>
+        </div>
+
+        <p v-else class="text-gray-400 mt-16 text-center">🔍 No products found.</p>
+      </div>
+
+      <!-- Orders Tab -->
+      <div v-if="activeTab === 'orders'">
+        <h2 class="text-xl font-bold mb-4">📦 Orders</h2>
+        <p class="text-gray-400">ยังไม่มีคำสั่งซื้อ</p>
+      </div>
+
+      <!-- Profile Tab / My Cart -->
+      <div v-if="activeTab === 'profile'">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">👤 Profile & My Cart</h2>
+          <!-- ปุ่มกลับไปดูสินค้า -->
+          <button
+            class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg font-semibold text-white"
+            @click="activeTab = 'products'"
+          >
+            ← Back to Products
+          </button>
+        </div>
+
+        <div v-if="cart.length" class="space-y-4">
+          <div
+            v-for="(item, index) in cart"
+            :key="index"
+            class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-inner"
+          >
+            <div class="flex items-center space-x-3">
+              <img :src="item.image_url || defaultImage" class="w-16 h-16 object-cover rounded" />
+              <div>
+                <p class="font-semibold">{{ item.name }}</p>
+                <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
+              </div>
+            </div>
+            <span class="font-semibold text-pink-400">฿{{ (item.price * item.quantity).toFixed(2) }}</span>
+          </div>
+          <p class="text-right font-bold mt-2">
+            Total: ฿{{ cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2) }}
+          </p>
+        </div>
+        <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
+      </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div
+      v-if="selectedProduct"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+      @click.self="closeProduct"
+    >
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+        <button
+          class="absolute top-2 right-2 text-gray-400 hover:text-white"
+          @click="closeProduct"
+        >
+          ✖
+        </button>
+
+        <img
+          :src="selectedProduct.image_url || defaultImage"
+          class="w-full h-60 object-cover rounded mb-4"
+        />
+        <h2 class="text-2xl font-bold mb-2">{{ selectedProduct.name }}</h2>
+        <p class="text-gray-300 mb-2">{{ selectedProduct.description }}</p>
+        <p class="text-lg font-bold text-indigo-400 mb-3">฿{{ selectedProduct.price }}</p>
+        <p class="text-sm text-gray-400">
+          Seller: {{ selectedProduct.seller.username }} | Shop: {{ selectedProduct.seller.shop_name || 'N/A' }}
+        </p>
+
+        <button
+          class="mt-4 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
+          @click="addToCart(selectedProduct)"
+        >
+          🛒 Add to Cart
         </button>
       </div>
     </div>
-
-    <p v-else class="text-center text-gray-500 mt-16">🔍 No products found.</p>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, watch } from "vue";
+import axios from "axios";
 
-const defaultImage = '/default-item.jpg' // ใส่ภาพ fallback ถ้าไม่มีภาพสินค้า
-const search = ref('')
-const timeout = ref(null)
+// -----------------------------
+// State
+// -----------------------------
+const activeTab = ref("products");
+const defaultImage = "/default-item.jpg";
+const allProducts = ref([]);
+const selectedProduct = ref(null);
 
-const allProducts = ref([
-  {
-    id: 1,
-    title: 'Used iPhone 12',
-    description: 'Secondhand in great condition',
-    price: 14500,
-    image: 'https://via.placeholder.com/300x200',
+// 🛒 Cart state + localStorage
+const cart = ref(JSON.parse(localStorage.getItem("cart") || "[]"));
+
+// Sync cart กับ localStorage
+watch(
+  cart,
+  (newVal) => {
+    localStorage.setItem("cart", JSON.stringify(newVal));
   },
-  {
-    id: 2,
-    title: 'Office Chair - Like New',
-    description: 'Comfortable and adjustable',
-    price: 900,
-    image: 'https://via.placeholder.com/300x200',
-  },
-  {
-    id: 3,
-    title: 'Gaming Laptop',
-    description: 'High spec, perfect for games and work',
-    price: 20000,
-    image: 'https://via.placeholder.com/300x200',
-  },
-])
+  { deep: true }
+);
 
-const cart = ref([])
+// -----------------------------
+// Fetch products จาก API
+// -----------------------------
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get("http://localhost:5000/api/products");
+    allProducts.value = res.data.map((p) => ({
+      id: p.id || p._id,
+      name: p.name,
+      description: p.description,
+      price: parseFloat(p.price),
+      image_url: p.image_url ? `http://localhost:5000${p.image_url}` : defaultImage,
+      seller: p.seller || { username: "Unknown", shop_name: "" },
+    }));
+  } catch (err) {
+    console.error("Failed to fetch products:", err);
+  }
+};
 
-const filteredProducts = computed(() => {
-  const q = search.value.toLowerCase().trim()
-  return q
-    ? allProducts.value.filter((p) =>
-        p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q)
-      )
-    : allProducts.value
-})
+// -----------------------------
+// Modal control
+// -----------------------------
+const openProduct = (product) => {
+  selectedProduct.value = product;
+};
 
-const debouncedSearch = () => {
-  clearTimeout(timeout.value)
-  timeout.value = setTimeout(() => {
-    // trigger computed
-  }, 300)
-}
+const closeProduct = () => {
+  selectedProduct.value = null;
+};
 
+// -----------------------------
+// Cart functions
+// -----------------------------
 const addToCart = (product) => {
-  cart.value.push(product)
-}
+  const existing = cart.value.find((item) => item.id === product.id);
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+  } else {
+    cart.value.push({ ...product, quantity: 1 });
+  }
+  closeProduct();
+};
 
-const goToCart = () => {
-  alert('Go to cart page (to be implemented)')
-}
+// -----------------------------
+// Lifecycle
+// -----------------------------
+onMounted(() => {
+  fetchProducts();
+});
 </script>
-
-<style scoped>
-.btn-black {
-  background-color: #000;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  border: 1px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.btn-black:hover {
-  background-color: #222;
-  color: #a3a3a3;
-  border-color: #555;
-}
-</style>
