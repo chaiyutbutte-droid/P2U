@@ -1,7 +1,6 @@
 <template>
   <nav class="bg-gradient-to-r from-black to-pink-950 text-white px-6 py-4 flex items-center shadow-md relative">
 
-
     <!-- ชื่อแอป -->
     <NuxtLink 
       to="/dashboard" 
@@ -27,7 +26,7 @@
         />
       </NuxtLink>
 
-            <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
+      <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
       <div v-if="user" class="relative">
         <button
           @click="toggleSettings"
@@ -40,6 +39,7 @@
           v-if="showSettings"
           class="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg z-50"
         >
+          <!-- Logout button -->
           <button
             @click="handleLogout"
             class="w-full text-left px-4 py-2 hover:bg-gray-100 transition"
@@ -49,8 +49,7 @@
         </div>
       </div>
 
-
-      <!-- ปุ่ม Login ถ้าไม่ได้ล็อกอิน -->
+      <!-- ปุ่ม Register ถ้าไม่ได้ล็อกอิน -->
       <NuxtLink
         v-else
         to="/register"
@@ -64,21 +63,18 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'  // เพิ่ม useRoute ด้วย
+import { useRouter, useRoute } from 'vue-router'
 
-const route = useRoute()  // เพิ่มบรรทัดนี้เพื่อดึง path ปัจจุบัน
-
-
+const route = useRoute()
 const router = useRouter()
 const user = ref(null)
 const showSettings = ref(false)
 
-// ซ่อนถ้าหน้าเป็น login หรือ register
+// ซ่อน Navbar ในหน้า login / register
 const hideNavbar = computed(() => {
   const hiddenPages = ['/login', '/register']
   return hiddenPages.includes(route.path)
 })
-
 
 function loadUser() {
   const storedUser = localStorage.getItem('user')
@@ -95,12 +91,8 @@ function loadUser() {
 
 const baseUrl = 'http://localhost:5000'
 const profileImageUrl = computed(() => {
-  if (!user.value || !user.value.profile_image_url) {
-    return '/guest-profile.png'
-  }
-  if (user.value.profile_image_url.startsWith('http')) {
-    return user.value.profile_image_url
-  }
+  if (!user.value || !user.value.profile_image_url) return '/guest-profile.png'
+  if (user.value.profile_image_url.startsWith('http')) return user.value.profile_image_url
   return baseUrl + user.value.profile_image_url
 })
 
@@ -108,7 +100,6 @@ const toggleSettings = () => {
   showSettings.value = !showSettings.value
 }
 
-// กด Logout
 const handleLogout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('username')

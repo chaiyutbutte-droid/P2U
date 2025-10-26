@@ -37,12 +37,15 @@
             <p class="text-sm text-gray-400">{{ product.description }}</p>
             <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
             <p class="text-sm text-gray-400 mt-1">
-              Seller: {{ product.seller.username }} | Shop: {{ product.seller.shop_name || 'N/A' }}
+              Seller: {{ product.seller.username }} | Shop:
+              {{ product.seller.shop_name || "N/A" }}
             </p>
           </div>
         </div>
 
-        <p v-else class="text-gray-400 mt-16 text-center">🔍 No products found.</p>
+        <p v-else class="text-gray-400 mt-16 text-center">
+          🔍 No products found.
+        </p>
       </div>
 
       <!-- Orders Tab -->
@@ -71,16 +74,25 @@
             class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-inner"
           >
             <div class="flex items-center space-x-3">
-              <img :src="item.image_url || defaultImage" class="w-16 h-16 object-cover rounded" />
+              <img
+                :src="item.image_url || defaultImage"
+                class="w-16 h-16 object-cover rounded"
+              />
               <div>
                 <p class="font-semibold">{{ item.name }}</p>
                 <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
               </div>
             </div>
-            <span class="font-semibold text-pink-400">฿{{ (item.price * item.quantity).toFixed(2) }}</span>
+            <span class="font-semibold text-pink-400"
+              >฿{{ (item.price * item.quantity).toFixed(2) }}</span
+            >
           </div>
           <p class="text-right font-bold mt-2">
-            Total: ฿{{ cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2) }}
+            Total: ฿{{
+              cart
+                .reduce((sum, item) => sum + item.price * item.quantity, 0)
+                .toFixed(2)
+            }}
           </p>
         </div>
         <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
@@ -88,7 +100,7 @@
     </main>
 
     <!-- Product Modal -->
-    <div
+    <!-- <div
       v-if="selectedProduct"
       class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
       @click.self="closeProduct"
@@ -118,6 +130,84 @@
         >
           🛒 Add to Cart
         </button>
+      </div>
+    </div> -->
+    <div
+      v-if="selectedProduct"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+      @click.self="closeProduct"
+    >
+      <div
+        class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg relative"
+      >
+        <!-- Close button -->
+        <button
+          class="absolute top-2 right-2 text-gray-400 hover:text-white"
+          @click="closeProduct"
+        >
+          ✖
+        </button>
+
+        <!-- Product Image -->
+        <img
+          :src="selectedProduct.image_url || defaultImage"
+          class="w-full h-60 object-cover rounded mb-4"
+        />
+
+        <!-- Product Info -->
+        <h2 class="text-2xl font-bold mb-2">{{ selectedProduct.name }}</h2>
+        <p class="text-gray-300 mb-2">{{ selectedProduct.description }}</p>
+        <p class="text-lg font-bold text-indigo-400 mb-3">
+          ฿{{ selectedProduct.price }}
+        </p>
+        <p class="text-sm text-gray-400 mb-3">
+          Seller: {{ selectedProduct.seller.username }} | Shop:
+          {{ selectedProduct.seller.shop_name || "N/A" }}
+        </p>
+
+        <!-- Ratings / Reviews -->
+        <div class="flex items-center mb-4">
+          <span v-for="i in 5" :key="i" class="text-yellow-400 mr-1">★</span>
+          <span class="text-gray-400 ml-2 text-sm">
+            ({{ selectedProduct.reviews?.length || 0 }} reviews)
+          </span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <!-- Add to Cart -->
+          <button
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold text-white text-center"
+            @click="addToCart(selectedProduct)"
+          >
+            🛒 Add to Cart
+          </button>
+
+          <!-- Buy Now -->
+          <button
+            class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold text-white text-center"
+          >
+            💰 Buy Now
+          </button>
+
+          <!-- Reviews -->
+          <NuxtLink
+            :to="`/product/${selectedProduct.id}/reviews`"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold text-white text-center"
+            @click="closeProduct"
+          >
+            ⭐ Reviews
+          </NuxtLink>
+
+          <!-- More Options Dropdown -->
+          <div class="relative flex-1">
+            <button
+              class="w-full bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg font-semibold text-white text-center"
+            >
+              ⋮ More
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -158,7 +248,9 @@ const fetchProducts = async () => {
       name: p.name,
       description: p.description,
       price: parseFloat(p.price),
-      image_url: p.image_url ? `http://localhost:5000${p.image_url}` : defaultImage,
+      image_url: p.image_url
+        ? `http://localhost:5000${p.image_url}`
+        : defaultImage,
       seller: p.seller || { username: "Unknown", shop_name: "" },
     }));
   } catch (err) {
