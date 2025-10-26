@@ -165,7 +165,7 @@
         </p>
 
         <button
-          class="mt-4 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
+          class="mt-5 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
           @click="addToCart(selectedProduct)"
         >
           🛒 Add to Cart
