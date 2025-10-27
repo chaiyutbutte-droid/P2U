@@ -1,4 +1,5 @@
 <template>
+  <Sidebar />
   <div class="flex min-h-screen bg-gray-900 text-white relative">
     <!-- Cart Icon -->
     <div class="absolute top-4 right-6 z-90 bg-slate-500 rounded-[50%] p-2 flex-shrink-0 transition transform hover:scale-110">
@@ -178,7 +179,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
-
+import Sidebar from '~/components/sidebar.vue'
 // -----------------------------
 // State
 // -----------------------------
