@@ -1,8 +1,8 @@
 <template>
   <div class="flex min-h-screen bg-gray-900 text-white relative">
     <!-- Cart Icon -->
-    <div class="absolute top-4 right-6">
-      <button class="relative" @click="activeTab = 'profile'">
+    <div class="absolute top-4 right-6 z-90 bg-slate-500 rounded-[50%] p-2 flex-shrink-0 transition transform hover:scale-110">
+      <button class="relative " @click="activeTab = 'profile'">
         <span class="text-3xl">🛒</span>
         <span
           v-if="cart.length"
@@ -17,8 +17,61 @@
     <main class="flex-1 p-8">
       <!-- Products Tab -->
       <div v-if="activeTab === 'products'">
-        <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+        
 
+        <!-- 🖼️ Banner Carousel -->
+        <div class="relative mb-8">
+          <div class="overflow-hidden rounded-xl shadow-lg">
+            <div
+              class="flex transition-transform duration-500"
+              :style="{ transform: `translateX(-${currentBanner * 100}%)` }"
+            >
+              <div
+                v-for="(banner, index) in banners"
+                :key="index"
+                class="min-w-full h-60 sm:h-72 md:h-80 bg-gray-700 relative"
+              >
+                <img
+                  :src="banner.image"
+                  alt="Banner"
+                  class="w-full h-full object-cover"
+                />
+                <div
+                  class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
+                >
+                  <h3 class="text-lg font-bold">{{ banner.title }}</h3>
+                  <p class="text-sm text-gray-300">{{ banner.subtitle }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+  <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+          <!-- Navigation Buttons -->
+          <button
+            class="absolute top-1/2 -translate-y-1/2 left-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+            @click="prevBanner"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#ed9bff" d="m9.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675t-.15-.75t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z"/></svg>
+          </button>
+          <button
+            class="absolute top-1/2 -translate-y-1/2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
+            @click="nextBanner"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#ed9bff" d="m14.475 12l-7.35-7.35q-.375-.375-.363-.888t.388-.887t.888-.375t.887.375l7.675 7.7q.3.3.45.675t.15.75t-.15.75t-.45.675l-7.7 7.7q-.375.375-.875.363T7.15 21.1t-.375-.888t.375-.887z"/></svg>
+          </button>
+
+          <!-- Indicators -->
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+            <span
+              v-for="(banner, index) in banners"
+              :key="'dot-' + index"
+              class="w-3 h-3 rounded-full"
+              :class="currentBanner === index ? 'bg-white' : 'bg-gray-400'"
+            ></span>
+          </div>
+        </div>
+
+        <!-- Product Grid -->
         <div
           v-if="allProducts.length"
           class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
@@ -55,7 +108,6 @@
       <div v-if="activeTab === 'profile'">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-bold">👤 Profile & My Cart</h2>
-          <!-- ปุ่มกลับไปดูสินค้า -->
           <button
             class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg font-semibold text-white"
             @click="activeTab = 'products'"
@@ -113,7 +165,7 @@
         </p>
 
         <button
-          class="mt-4 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
+          class="mt-5 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
           @click="addToCart(selectedProduct)"
         >
           🛒 Add to Cart
@@ -178,7 +230,7 @@ const closeProduct = () => {
 };
 
 // -----------------------------
-// Cart functions
+// Cart functionss
 // -----------------------------
 const addToCart = (product) => {
   const existing = cart.value.find((item) => item.id === product.id);
@@ -189,6 +241,41 @@ const addToCart = (product) => {
   }
   closeProduct();
 };
+
+// -----------------------------
+// Banner Carousel
+// -----------------------------
+const banners = ref([
+  {
+    image: "/banners/banner1.jpg",
+    title: "SPRING / SUMMER COLLECTION 2025",
+    subtitle: "Explore new digital art collections",
+  },
+  {
+    image: "/banners/banner2.jpg",
+    title: "LIMITED EDITION ITEMS",
+    subtitle: "Grab exclusive deals before they're gone!",
+  },
+  {
+    image: "/banners/banner3.jpg",
+    title: "TOP SELLERS THIS WEEK",
+    subtitle: "Check out the most popular items",
+  },
+]);
+
+const currentBanner = ref(0);
+
+const nextBanner = () => {
+  currentBanner.value = (currentBanner.value + 1) % banners.value.length;
+};
+
+const prevBanner = () => {
+  currentBanner.value =
+    (currentBanner.value - 1 + banners.value.length) % banners.value.length;
+};
+
+// Auto slide
+setInterval(nextBanner, 5000);
 
 // -----------------------------
 // Lifecycle
