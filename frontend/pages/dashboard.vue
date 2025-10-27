@@ -230,7 +230,7 @@ const closeProduct = () => {
 };
 
 // -----------------------------
-// Cart functions
+// Cart functionss
 // -----------------------------
 const addToCart = (product) => {
   const existing = cart.value.find((item) => item.id === product.id);
