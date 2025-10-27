@@ -134,78 +134,83 @@
     </div> -->
     <div
       v-if="selectedProduct"
-      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4"
       @click.self="closeProduct"
     >
       <div
-        class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg relative"
+        class="bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl p-6 sm:p-12 flex flex-col sm:flex-row gap-6 relative"
       >
         <!-- Close button -->
         <button
-          class="absolute top-2 right-2 text-gray-400 hover:text-white"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"
           @click="closeProduct"
         >
           ✖
         </button>
 
-        <!-- Product Image -->
-        <img
-          :src="selectedProduct.image_url || defaultImage"
-          class="w-full h-60 object-cover rounded mb-4"
-        />
-
-        <!-- Product Info -->
-        <h2 class="text-2xl font-bold mb-2">{{ selectedProduct.name }}</h2>
-        <p class="text-gray-300 mb-2">{{ selectedProduct.description }}</p>
-        <p class="text-lg font-bold text-indigo-400 mb-3">
-          ฿{{ selectedProduct.price }}
-        </p>
-        <p class="text-sm text-gray-400 mb-3">
-          Seller: {{ selectedProduct.seller.username }} | Shop:
-          {{ selectedProduct.seller.shop_name || "N/A" }}
-        </p>
-
-        <!-- Ratings / Reviews -->
-        <div class="flex items-center mb-4">
-          <span v-for="i in 5" :key="i" class="text-yellow-400 mr-1">★</span>
-          <span class="text-gray-400 ml-2 text-sm">
-            ({{ selectedProduct.reviews?.length || 0 }} reviews)
-          </span>
+        <!-- Left: Product Image -->
+        <div class="flex-shrink-0 sm:w-1/2">
+          <img
+            :src="selectedProduct.image_url || defaultImage"
+            class="w-full h-80 object-cover rounded-lg"
+          />
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-3">
-          <!-- Add to Cart -->
-          <button
-            class="flex-1 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold text-white text-center"
-            @click="addToCart(selectedProduct)"
-          >
-            🛒 Add to Cart
-          </button>
+        <!-- Right: Product Info -->
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            <!-- Product Name & Description -->
+            <h2 class="text-2xl font-bold mb-2">{{ selectedProduct.name }}</h2>
+            <p class="text-gray-300 mb-2">{{ selectedProduct.description }}</p>
+            <p class="text-lg font-bold text-indigo-400 mb-3">
+              ฿{{ selectedProduct.price }}
+            </p>
+            <p class="text-sm text-gray-400 mb-3">
+              Seller: {{ selectedProduct.seller.username }} | Shop:
+              {{ selectedProduct.seller.shop_name || "N/A" }}
+            </p>
 
-          <!-- Buy Now -->
-          <button
-            class="flex-1 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold text-white text-center"
-          >
-            💰 Buy Now
-          </button>
+            <!-- Ratings / Reviews -->
+            <div class="flex items-center mb-2">
+              <span v-for="i in 5" :key="i" class="text-yellow-400 mr-1"
+                >★</span
+              >
+              <span class="text-gray-400 ml-2 text-sm">
+                ({{ selectedProduct.reviews?.length || 0 }} reviews)
+              </span>
+            </div>
+          </div>
 
-          <!-- Reviews -->
-          <NuxtLink
-            :to="`/product/${selectedProduct.id}/reviews`"
-            class="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold text-white text-center"
-            @click="closeProduct"
-          >
-            ⭐ Reviews
-          </NuxtLink>
-
-          <!-- More Options Dropdown -->
-          <div class="relative flex-1">
+          <!-- Action Buttons -->
+          <div class="flex flex-col gap-3 mt-4 w-full">
             <button
-              class="w-full bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg font-semibold text-white text-center"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-3 rounded-lg font-semibold text-white text-center"
+              @click="addToCart(selectedProduct)"
             >
-              ⋮ More
+              🛒 Add to Cart
             </button>
+
+            <button
+              class="w-full bg-green-600 hover:bg-green-700 px-4 py-3 rounded-lg font-semibold text-white text-center"
+            >
+              💰 Buy Now
+            </button>
+
+            <NuxtLink
+              :to="`/product/${selectedProduct.id}/reviews`"
+              class="w-full bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg font-semibold text-white text-center"
+              @click="closeProduct"
+            >
+              ⭐ Reviews
+            </NuxtLink>
+
+            <div class="relative w-full">
+              <button
+                class="w-full bg-gray-800 hover:bg-gray-700 px-4 py-3 rounded-lg font-semibold text-white text-center"
+              >
+                ⋮ More
+              </button>
+            </div>
           </div>
         </div>
       </div>
