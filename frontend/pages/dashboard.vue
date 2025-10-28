@@ -34,6 +34,7 @@
                   :src="banner.image"
                   alt="Banner"
                   class="w-full h-full object-cover"
+                  @error="banner.image = defaultImage"
                 />
                 <div
                   class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
@@ -106,6 +107,7 @@
             <img
               :src="product.image_url || defaultImage"
               class="w-full h-40 object-cover rounded mb-3"
+              @error="product.image_url = defaultImage"
             />
             <h3 class="font-semibold">{{ product.name }}</h3>
             <p class="text-sm text-gray-400">{{ product.description }}</p>
@@ -153,6 +155,7 @@
               <img
                 :src="item.image_url || defaultImage"
                 class="w-16 h-16 object-cover rounded"
+                @error="item.image_url = defaultImage"
               />
               <div>
                 <p class="font-semibold">{{ item.name }}</p>
@@ -207,6 +210,7 @@
             :src="selectedProduct.image_url || defaultImage"
             alt="Product"
             class="w-full h-96 object-contain rounded-lg bg-gray-700"
+            @error="selectedProduct.image_url = defaultImage"
           />
 
           <div class="flex gap-2 mt-4">
@@ -256,10 +260,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "axios";
 
-import Sidebar from "~/components/sidebar.vue";
+// ✅ แก้ import ให้ถูกต้อง
+import Sidebar from '~/components/Sidebar.vue';
 
 // -----------------------------
 // State
@@ -270,15 +275,12 @@ const allProducts = ref([]);
 const selectedProduct = ref(null);
 const showCartIcon = ref(true);
 
-// ✅ Cart - ป้องกัน SSR
+// -----------------------------
+// Cart - Client only
+// -----------------------------
 const cart = ref([]);
-
 if (process.client) {
   cart.value = JSON.parse(localStorage.getItem("cart") || "[]");
-}
-
-// ✅ Sync cart กับ localStorage (client only)
-if (process.client) {
   watch(
     cart,
     (newVal) => {
@@ -316,7 +318,6 @@ const fetchProducts = async () => {
 const openProduct = (product) => {
   selectedProduct.value = product;
 };
-
 const closeProduct = () => {
   selectedProduct.value = null;
 };
@@ -335,11 +336,9 @@ const addToCart = (product) => {
 };
 
 const removeFromCart = (product) => {
-  console.log('Product to remove:', product); // Add this to debug
   if (product && product.id) {
     const existingIndex = cart.value.findIndex((item) => item.id === product.id);
     if (existingIndex !== -1) {
-      // Decrease quantity or remove the item
       if (cart.value[existingIndex].quantity > 1) {
         cart.value[existingIndex].quantity -= 1;
       } else {
@@ -351,17 +350,12 @@ const removeFromCart = (product) => {
   }
 };
 
-// ---------------
+// -----------------------------
 // Show cart
-// ---------------
+// -----------------------------
 function goToProfile() {
   activeTab.value = "profile";
-  showCartIcon.value = false; // ซ่อนปุ่ม
-}
-
-function goBack() {
-  activeTab.value = "home";
-  showCartIcon.value = true; // แสดงปุ่ม
+  showCartIcon.value = false;
 }
 
 // -----------------------------
@@ -369,30 +363,31 @@ function goBack() {
 // -----------------------------
 const banners = ref([
   {
-    image: "/banners/banner1.jpg",
+    image: "https://i.ytimg.com/vi/RZZ1Bt1Y5io/maxresdefault.jpg",
     title: "SPRING / SUMMER COLLECTION 2025",
     subtitle: "Explore new digital art collections",
   },
   {
-    image: "/banners/banner2.jpg",
+    image: "https://cdn.pfps.gg/banners/8762-boa-hancock.png",
     title: "LIMITED EDITION ITEMS",
     subtitle: "Grab exclusive deals before they're gone!",
   },
   {
-    image: "/banners/banner3.jpg",
+    image: "https://i.pinimg.com/564x/e9/60/e2/e960e2338c8f5243a5fe931792b3987c.jpg",
     title: "TOP SELLERS THIS WEEK",
     subtitle: "Check out the most popular items",
   },
 ]);
 
+
 const currentBanner = ref(0);
+let bannerInterval = null;
 
 const nextBanner = () => {
   if (banners.value.length) {
     currentBanner.value = (currentBanner.value + 1) % banners.value.length;
   }
 };
-
 const prevBanner = () => {
   if (banners.value.length) {
     currentBanner.value =
@@ -405,8 +400,12 @@ const prevBanner = () => {
 // -----------------------------
 onMounted(() => {
   fetchProducts();
+  if (process.client) {
+    bannerInterval = setInterval(nextBanner, 5000);
+  }
+});
 
-  // ✅ Start Auto Slide only if client
-  setInterval(nextBanner, 5000);
+onBeforeUnmount(() => {
+  if (bannerInterval) clearInterval(bannerInterval);
 });
 </script>
