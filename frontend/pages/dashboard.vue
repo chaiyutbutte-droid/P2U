@@ -1,9 +1,10 @@
 <template>
   <Sidebar />
   <div class="flex min-h-screen bg-gray-900 text-white relative">
-    <!-- Cart Icon -->
-    <div class="absolute top-4 right-6 z-90 bg-slate-500 rounded-[50%] p-2 flex-shrink-0 transition transform hover:scale-110">
-      <button class="relative " @click="activeTab = 'profile'">
+    <!-- Cart Icon -->                                                            
+    <div v-if="showCartIcon" class="absolute top-4 right-6">
+      <button class="relative" @click="goToProfile">
+
         <span class="text-3xl">🛒</span>
         <span
           v-if="cart.length"
@@ -91,12 +92,15 @@
             <p class="text-sm text-gray-400">{{ product.description }}</p>
             <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
             <p class="text-sm text-gray-400 mt-1">
-              Seller: {{ product.seller.username }} | Shop: {{ product.seller.shop_name || 'N/A' }}
+              Seller: {{ product.seller.username }} | Shop:
+              {{ product.seller.shop_name || "N/A" }}
             </p>
           </div>
         </div>
 
-        <p v-else class="text-gray-400 mt-16 text-center">🔍 No products found.</p>
+        <p v-else class="text-gray-400 mt-16 text-center">
+          🔍 No products found.
+        </p>
       </div>
 
       <!-- Orders Tab -->
@@ -111,7 +115,10 @@
           <h2 class="text-xl font-bold">👤 Profile & My Cart</h2>
           <button
             class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg font-semibold text-white"
-            @click="activeTab = 'products'"
+            @click="
+              activeTab = 'products';
+              showCartIcon = true;
+            "
           >
             ← Back to Products
           </button>
@@ -124,16 +131,25 @@
             class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-inner"
           >
             <div class="flex items-center space-x-3">
-              <img :src="item.image_url || defaultImage" class="w-16 h-16 object-cover rounded" />
+              <img
+                :src="item.image_url || defaultImage"
+                class="w-16 h-16 object-cover rounded"
+              />
               <div>
                 <p class="font-semibold">{{ item.name }}</p>
                 <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
               </div>
             </div>
-            <span class="font-semibold text-pink-400">฿{{ (item.price * item.quantity).toFixed(2) }}</span>
+            <span class="font-semibold text-pink-400"
+              >฿{{ (item.price * item.quantity).toFixed(2) }}</span
+            >
           </div>
           <p class="text-right font-bold mt-2">
-            Total: ฿{{ cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2) }}
+            Total: ฿{{
+              cart
+                .reduce((sum, item) => sum + item.price * item.quantity, 0)
+                .toFixed(2)
+            }}
           </p>
         </div>
         <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
@@ -143,34 +159,71 @@
     <!-- Product Modal -->
     <div
       v-if="selectedProduct"
-      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
       @click.self="closeProduct"
     >
-      <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+      <div
+        class="bg-gray-900 rounded-2xl shadow-2xl w-[90%] max-w-5xl relative flex flex-col md:flex-row overflow-hidden"
+      >
+        <!-- ปุ่มปิด -->
         <button
-          class="absolute top-2 right-2 text-gray-400 hover:text-white"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
           @click="closeProduct"
         >
-          ✖
+          ✕
         </button>
 
-        <img
-          :src="selectedProduct.image_url || defaultImage"
-          class="w-full h-60 object-cover rounded mb-4"
-        />
-        <h2 class="text-2xl font-bold mb-2">{{ selectedProduct.name }}</h2>
-        <p class="text-gray-300 mb-2">{{ selectedProduct.description }}</p>
-        <p class="text-lg font-bold text-indigo-400 mb-3">฿{{ selectedProduct.price }}</p>
-        <p class="text-sm text-gray-400">
-          Seller: {{ selectedProduct.seller.username }} | Shop: {{ selectedProduct.seller.shop_name || 'N/A' }}
-        </p>
+        <!-- ส่วนรูปสินค้า -->
+        <div class="w-full md:w-1/2 flex flex-col items-center bg-gray-800 p-6">
+          <img
+            :src="selectedProduct.image_url || defaultImage"
+            alt="Product"
+            class="w-full h-96 object-contain rounded-lg bg-gray-700"
+          />
 
-        <button
-          class="mt-5 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
-          @click="addToCart(selectedProduct)"
-        >
-          🛒 Add to Cart
-        </button>
+
+          <div class="flex gap-2 mt-4">
+            <img
+              v-for="(img, i) in [selectedProduct.image_url]"
+              :key="i"
+              :src="selectedProduct.image_url || defaultImage"
+              class="w-20 h-20 rounded-lg object-cover cursor-pointer border border-gray-600 hover:border-pink-400"
+            />
+          </div>
+        </div>
+
+        <!-- ส่วนรายละเอียดสินค้า -->
+        <div class="flex-1 p-6 text-white flex flex-col justify-between">
+          <div>
+            <h2 class="text-3xl font-bold mb-2">{{ selectedProduct.name }}</h2>
+            <p class="text-gray-300 mb-4">{{ selectedProduct.description }}</p>
+
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-yellow-400 text-xl">★★★★★</span>
+              <span class="text-gray-400 text-sm">4.9 (3.2k รีวิว)</span>
+            </div>
+
+            <p class="text-4xl text-pink-400 font-extrabold mb-6">
+              ฿{{ selectedProduct.price }}
+            </p>
+          </div>
+
+          <div class="flex gap-4">
+            <button
+              class="bg-pink-600 hover:bg-white text-white  hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
+              @click="addToCart(selectedProduct)"
+            >
+              🛒 เพิ่มลงตะกร้า
+            </button>
+            <NuxtLink
+              to="/payment"
+              class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black  font-bold py-3 px-8 rounded-lg"
+            >
+              💰 ซื้อเลย
+            </NuxtLink>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -179,7 +232,9 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
+
 import Sidebar from '~/components/sidebar.vue'
+
 // -----------------------------
 // State
 // -----------------------------
@@ -187,6 +242,7 @@ const activeTab = ref("products");
 const defaultImage = "/default-item.jpg";
 const allProducts = ref([]);
 const selectedProduct = ref(null);
+const showCartIcon = ref(true);
 
 // ✅ Cart - ป้องกัน SSR
 const cart = ref([]);
@@ -217,7 +273,9 @@ const fetchProducts = async () => {
       name: p.name,
       description: p.description,
       price: parseFloat(p.price),
-      image_url: p.image_url ? `http://localhost:5000${p.image_url}` : defaultImage,
+      image_url: p.image_url
+        ? `http://localhost:5000${p.image_url}`
+        : defaultImage,
       seller: p.seller || { username: "Unknown", shop_name: "" },
     }));
   } catch (err) {
@@ -249,6 +307,19 @@ const addToCart = (product) => {
   }
   closeProduct();
 };
+
+// ---------------
+// Show cart
+// ---------------
+function goToProfile() {
+  activeTab.value = "profile";
+  showCartIcon.value = false; // ซ่อนปุ่ม
+}
+
+function goBack() {
+  activeTab.value = "home";
+  showCartIcon.value = true; // แสดงปุ่ม
+}
 
 // -----------------------------
 // Banner Carousel
