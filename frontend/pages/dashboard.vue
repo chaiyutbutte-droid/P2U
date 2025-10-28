@@ -22,7 +22,7 @@
         
 
         <!-- 🖼️ Banner Carousel -->
-        <div class="relative mb-8">
+        <div class="relative mb-8 mt-8">
           <div class="overflow-hidden rounded-xl shadow-lg">
             <div
               class="flex transition-transform duration-500"
