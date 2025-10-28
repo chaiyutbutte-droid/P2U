@@ -13,4 +13,5 @@
 import Navbar from '~/components/Navbar.vue'
 import Footer from '~/components/Footer.vue'
 import sidebar from '~/components/sidebar.vue';
+
 </script>

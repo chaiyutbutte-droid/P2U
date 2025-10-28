@@ -2,8 +2,8 @@
   <Sidebar />
   <div class="flex min-h-screen bg-gray-900 text-white relative">
     <!-- Cart Icon -->
-    <div class="absolute top-4 right-6 z-90 bg-slate-500 rounded-[50%] p-2 flex-shrink-0 transition transform hover:scale-110">
-      <button class="relative " @click="activeTab = 'profile'">
+    <div v-if="showCartIcon" class="absolute top-4 right-6">
+      <button class="relative" @click="goToProfile">
         <span class="text-3xl">🛒</span>
         <span
           v-if="cart.length"
@@ -18,10 +18,8 @@
     <main class="flex-1 p-8">
       <!-- Products Tab -->
       <div v-if="activeTab === 'products'">
-        
-
         <!-- 🖼️ Banner Carousel -->
-        <div class="relative mb-8">
+        <div class="relative mb-8 mt-8">
           <div class="overflow-hidden rounded-xl shadow-lg">
             <div
               class="flex transition-transform duration-500"
@@ -36,6 +34,7 @@
                   :src="banner.image"
                   alt="Banner"
                   class="w-full h-full object-cover"
+                  @error="banner.image = defaultImage"
                 />
                 <div
                   class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
@@ -46,23 +45,45 @@
               </div>
             </div>
           </div>
-  <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+          <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
           <!-- Navigation Buttons -->
           <button
             class="absolute top-1/2 -translate-y-1/2 left-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
             @click="prevBanner"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#ed9bff" d="m9.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675t-.15-.75t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#ed9bff"
+                d="m9.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675t-.15-.75t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z"
+              />
+            </svg>
           </button>
           <button
             class="absolute top-1/2 -translate-y-1/2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
             @click="nextBanner"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#ed9bff" d="m14.475 12l-7.35-7.35q-.375-.375-.363-.888t.388-.887t.888-.375t.887.375l7.675 7.7q.3.3.45.675t.15.75t-.15.75t-.45.675l-7.7 7.7q-.375.375-.875.363T7.15 21.1t-.375-.888t.375-.887z"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#ed9bff"
+                d="m14.475 12l-7.35-7.35q-.375-.375-.363-.888t.388-.887t.888-.375t.887.375l7.675 7.7q.3.3.45.675t.15.75t-.15.75t-.45.675l-7.7 7.7q-.375.375-.875.363T7.15 21.1t-.375-.888t.375-.887z"
+              />
+            </svg>
           </button>
 
           <!-- Indicators -->
-          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+          <div
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2"
+          >
             <span
               v-for="(banner, index) in banners"
               :key="'dot-' + index"
@@ -86,17 +107,21 @@
             <img
               :src="product.image_url || defaultImage"
               class="w-full h-40 object-cover rounded mb-3"
+              @error="product.image_url = defaultImage"
             />
             <h3 class="font-semibold">{{ product.name }}</h3>
             <p class="text-sm text-gray-400">{{ product.description }}</p>
             <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
             <p class="text-sm text-gray-400 mt-1">
-              Seller: {{ product.seller.username }} | Shop: {{ product.seller.shop_name || 'N/A' }}
+              Seller: {{ product.seller.username }} | Shop:
+              {{ product.seller.shop_name || "N/A" }}
             </p>
           </div>
         </div>
 
-        <p v-else class="text-gray-400 mt-16 text-center">🔍 No products found.</p>
+        <p v-else class="text-gray-400 mt-16 text-center">
+          🔍 No products found.
+        </p>
       </div>
 
       <!-- Orders Tab -->
@@ -111,7 +136,10 @@
           <h2 class="text-xl font-bold">👤 Profile & My Cart</h2>
           <button
             class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg font-semibold text-white"
-            @click="activeTab = 'products'"
+            @click="
+              activeTab = 'products';
+              showCartIcon = true;
+            "
           >
             ← Back to Products
           </button>
@@ -124,62 +152,120 @@
             class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-inner"
           >
             <div class="flex items-center space-x-3">
-              <img :src="item.image_url || defaultImage" class="w-16 h-16 object-cover rounded" />
+              <img
+                :src="item.image_url || defaultImage"
+                class="w-16 h-16 object-cover rounded"
+                @error="item.image_url = defaultImage"
+              />
               <div>
                 <p class="font-semibold">{{ item.name }}</p>
                 <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
               </div>
             </div>
-            <span class="font-semibold text-pink-400">฿{{ (item.price * item.quantity).toFixed(2) }}</span>
+            <div class="flex items-center space-x-4">
+              <span class="font-semibold text-pink-400"
+                >฿{{ (item.price * item.quantity).toFixed(2) }}</span
+              >
+              <button
+                @click="removeFromCart(item)"
+                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg font-semibold"
+              >
+                ✕
+              </button>
+              
+            </div>
           </div>
-          <p class="text-right font-bold mt-2">
-            Total: ฿{{ cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2) }}
-          </p>
         </div>
         <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
+          <p class="text-right font-bold mt-2">
+            Total: ฿{{
+              cart
+                .reduce((sum, item) => sum + item.price * item.quantity, 0)
+                .toFixed(2)
+            }}
+          </p>
       </div>
     </main>
 
     <!-- Product Modal -->
     <div
       v-if="selectedProduct"
-      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50"
+      class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-60"
       @click.self="closeProduct"
     >
-      <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg relative">
+      <div
+        class="bg-gray-900 rounded-2xl shadow-2xl w-[90%] max-w-5xl relative flex flex-col md:flex-row overflow-hidden"
+      >
+        <!-- ปุ่มปิด -->
         <button
-          class="absolute top-2 right-2 text-gray-400 hover:text-white"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl"
           @click="closeProduct"
         >
-          ✖
+          ✕
         </button>
 
-        <img
-          :src="selectedProduct.image_url || defaultImage"
-          class="w-full h-60 object-cover rounded mb-4"
-        />
-        <h2 class="text-2xl font-bold mb-2">{{ selectedProduct.name }}</h2>
-        <p class="text-gray-300 mb-2">{{ selectedProduct.description }}</p>
-        <p class="text-lg font-bold text-indigo-400 mb-3">฿{{ selectedProduct.price }}</p>
-        <p class="text-sm text-gray-400">
-          Seller: {{ selectedProduct.seller.username }} | Shop: {{ selectedProduct.seller.shop_name || 'N/A' }}
-        </p>
+        <!-- ส่วนรูปสินค้า -->
+        <div class="w-full md:w-1/2 flex flex-col items-center bg-gray-800 p-6">
+          <img
+            :src="selectedProduct.image_url || defaultImage"
+            alt="Product"
+            class="w-full h-96 object-contain rounded-lg bg-gray-700"
+            @error="selectedProduct.image_url = defaultImage"
+          />
 
-        <button
-          class="mt-5 bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-semibold"
-          @click="addToCart(selectedProduct)"
-        >
-          🛒 Add to Cart
-        </button>
+          <div class="flex gap-2 mt-4">
+            <img
+              v-for="(img, i) in [selectedProduct.image_url]"
+              :key="i"
+              :src="selectedProduct.image_url || defaultImage"
+              class="w-20 h-20 rounded-lg object-cover cursor-pointer border border-gray-600 hover:border-pink-400"
+            />
+          </div>
+        </div>
+
+        <!-- ส่วนรายละเอียดสินค้า -->
+        <div class="flex-1 p-6 text-white flex flex-col justify-between">
+          <div>
+            <h2 class="text-3xl font-bold mb-2">{{ selectedProduct.name }}</h2>
+            <p class="text-gray-300 mb-4">{{ selectedProduct.description }}</p>
+
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-yellow-400 text-xl">★★★★★</span>
+              <span class="text-gray-400 text-sm">4.9 (3.2k รีวิว)</span>
+            </div>
+
+            <p class="text-4xl text-pink-400 font-extrabold mb-6">
+              ฿{{ selectedProduct.price }}
+            </p>
+          </div>
+
+          <div class="flex gap-4">
+            <button
+              class="bg-pink-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
+              @click="addToCart(selectedProduct)"
+            >
+              🛒 เพิ่มลงตะกร้า
+            </button>
+            <NuxtLink
+              to="/payment"
+              class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg"
+            >
+              💰 ซื้อเลย
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "axios";
-import Sidebar from '~/components/sidebar.vue'
+
+// ✅ แก้ import ให้ถูกต้อง
+import Sidebar from '~/components/Sidebar.vue';
+
 // -----------------------------
 // State
 // -----------------------------
@@ -187,18 +273,22 @@ const activeTab = ref("products");
 const defaultImage = "/default-item.jpg";
 const allProducts = ref([]);
 const selectedProduct = ref(null);
+const showCartIcon = ref(true);
 
-// 🛒 Cart state + localStorage
-const cart = ref(JSON.parse(localStorage.getItem("cart") || "[]"));
-
-// Sync cart กับ localStorage
-watch(
-  cart,
-  (newVal) => {
-    localStorage.setItem("cart", JSON.stringify(newVal));
-  },
-  { deep: true }
-);
+// -----------------------------
+// Cart - Client only
+// -----------------------------
+const cart = ref([]);
+if (process.client) {
+  cart.value = JSON.parse(localStorage.getItem("cart") || "[]");
+  watch(
+    cart,
+    (newVal) => {
+      localStorage.setItem("cart", JSON.stringify(newVal));
+    },
+    { deep: true }
+  );
+}
 
 // -----------------------------
 // Fetch products จาก API
@@ -206,16 +296,19 @@ watch(
 const fetchProducts = async () => {
   try {
     const res = await axios.get("http://localhost:5000/api/products");
-    allProducts.value = res.data.map((p) => ({
+    allProducts.value = (res.data || []).map((p) => ({
       id: p.id || p._id,
       name: p.name,
       description: p.description,
       price: parseFloat(p.price),
-      image_url: p.image_url ? `http://localhost:5000${p.image_url}` : defaultImage,
+      image_url: p.image_url
+        ? `http://localhost:5000${p.image_url}`
+        : defaultImage,
       seller: p.seller || { username: "Unknown", shop_name: "" },
     }));
   } catch (err) {
     console.error("Failed to fetch products:", err);
+    allProducts.value = [];
   }
 };
 
@@ -225,13 +318,12 @@ const fetchProducts = async () => {
 const openProduct = (product) => {
   selectedProduct.value = product;
 };
-
 const closeProduct = () => {
   selectedProduct.value = null;
 };
 
 // -----------------------------
-// Cart functionss
+// Cart functions
 // -----------------------------
 const addToCart = (product) => {
   const existing = cart.value.find((item) => item.id === product.id);
@@ -243,45 +335,77 @@ const addToCart = (product) => {
   closeProduct();
 };
 
+const removeFromCart = (product) => {
+  if (product && product.id) {
+    const existingIndex = cart.value.findIndex((item) => item.id === product.id);
+    if (existingIndex !== -1) {
+      if (cart.value[existingIndex].quantity > 1) {
+        cart.value[existingIndex].quantity -= 1;
+      } else {
+        cart.value.splice(existingIndex, 1);
+      }
+    }
+  } else {
+    console.error('Invalid product:', product);
+  }
+};
+
+// -----------------------------
+// Show cart
+// -----------------------------
+function goToProfile() {
+  activeTab.value = "profile";
+  showCartIcon.value = false;
+}
+
 // -----------------------------
 // Banner Carousel
 // -----------------------------
 const banners = ref([
   {
-    image: "/banners/banner1.jpg",
+    image: "https://i.ytimg.com/vi/RZZ1Bt1Y5io/maxresdefault.jpg",
     title: "SPRING / SUMMER COLLECTION 2025",
     subtitle: "Explore new digital art collections",
   },
   {
-    image: "/banners/banner2.jpg",
+    image: "https://cdn.pfps.gg/banners/8762-boa-hancock.png",
     title: "LIMITED EDITION ITEMS",
     subtitle: "Grab exclusive deals before they're gone!",
   },
   {
-    image: "/banners/banner3.jpg",
+    image: "https://i.pinimg.com/564x/e9/60/e2/e960e2338c8f5243a5fe931792b3987c.jpg",
     title: "TOP SELLERS THIS WEEK",
     subtitle: "Check out the most popular items",
   },
 ]);
 
+
 const currentBanner = ref(0);
+let bannerInterval = null;
 
 const nextBanner = () => {
-  currentBanner.value = (currentBanner.value + 1) % banners.value.length;
+  if (banners.value.length) {
+    currentBanner.value = (currentBanner.value + 1) % banners.value.length;
+  }
 };
-
 const prevBanner = () => {
-  currentBanner.value =
-    (currentBanner.value - 1 + banners.value.length) % banners.value.length;
+  if (banners.value.length) {
+    currentBanner.value =
+      (currentBanner.value - 1 + banners.value.length) % banners.value.length;
+  }
 };
-
-// Auto slide
-setInterval(nextBanner, 5000);
 
 // -----------------------------
 // Lifecycle
 // -----------------------------
 onMounted(() => {
   fetchProducts();
+  if (process.client) {
+    bannerInterval = setInterval(nextBanner, 5000);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (bannerInterval) clearInterval(bannerInterval);
 });
 </script>
