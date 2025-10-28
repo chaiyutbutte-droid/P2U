@@ -4,7 +4,6 @@
     <!-- Cart Icon -->                                                            
     <div v-if="showCartIcon" class="absolute top-4 right-6">
       <button class="relative" @click="goToProfile">
-
         <span class="text-3xl">🛒</span>
         <span
           v-if="cart.length"
@@ -19,8 +18,6 @@
     <main class="flex-1 p-8">
       <!-- Products Tab -->
       <div v-if="activeTab === 'products'">
-        
-
         <!-- 🖼️ Banner Carousel -->
         <div class="relative mb-8">
           <div class="overflow-hidden rounded-xl shadow-lg">
@@ -37,6 +34,7 @@
                   :src="banner.image"
                   alt="Banner"
                   class="w-full h-full object-cover"
+                  @error="banner.image = defaultImage"
                 />
                 <div
                   class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4"
@@ -47,7 +45,7 @@
               </div>
             </div>
           </div>
-  <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+          <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
           <!-- Navigation Buttons -->
           <button
             class="absolute top-1/2 -translate-y-1/2 left-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
@@ -87,6 +85,7 @@
             <img
               :src="product.image_url || defaultImage"
               class="w-full h-40 object-cover rounded mb-3"
+              @error="product.image_url = defaultImage"
             />
             <h3 class="font-semibold">{{ product.name }}</h3>
             <p class="text-sm text-gray-400">{{ product.description }}</p>
@@ -134,6 +133,7 @@
               <img
                 :src="item.image_url || defaultImage"
                 class="w-16 h-16 object-cover rounded"
+                @error="item.image_url = defaultImage"
               />
               <div>
                 <p class="font-semibold">{{ item.name }}</p>
@@ -179,9 +179,8 @@
             :src="selectedProduct.image_url || defaultImage"
             alt="Product"
             class="w-full h-96 object-contain rounded-lg bg-gray-700"
+            @error="selectedProduct.image_url = defaultImage"
           />
-
-
           <div class="flex gap-2 mt-4">
             <img
               v-for="(img, i) in [selectedProduct.image_url]"
@@ -210,30 +209,29 @@
 
           <div class="flex gap-4">
             <button
-              class="bg-pink-600 hover:bg-white text-white  hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
+              class="bg-pink-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
               @click="addToCart(selectedProduct)"
             >
               🛒 เพิ่มลงตะกร้า
             </button>
             <NuxtLink
               to="/payment"
-              class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black  font-bold py-3 px-8 rounded-lg"
+              class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg"
             >
               💰 ซื้อเลย
             </NuxtLink>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "axios";
 
-import Sidebar from '~/components/sidebar.vue'
+import Sidebar from "../components/Sidebar.vue";
 
 // -----------------------------
 // State
@@ -244,15 +242,12 @@ const allProducts = ref([]);
 const selectedProduct = ref(null);
 const showCartIcon = ref(true);
 
-// ✅ Cart - ป้องกัน SSR
+// -----------------------------
+// Cart - Client only
+// -----------------------------
 const cart = ref([]);
-
 if (process.client) {
   cart.value = JSON.parse(localStorage.getItem("cart") || "[]");
-}
-
-// ✅ Sync cart กับ localStorage (client only)
-if (process.client) {
   watch(
     cart,
     (newVal) => {
@@ -290,7 +285,6 @@ const fetchProducts = async () => {
 const openProduct = (product) => {
   selectedProduct.value = product;
 };
-
 const closeProduct = () => {
   selectedProduct.value = null;
 };
@@ -308,17 +302,12 @@ const addToCart = (product) => {
   closeProduct();
 };
 
-// ---------------
+// -----------------------------
 // Show cart
-// ---------------
+// -----------------------------
 function goToProfile() {
   activeTab.value = "profile";
-  showCartIcon.value = false; // ซ่อนปุ่ม
-}
-
-function goBack() {
-  activeTab.value = "home";
-  showCartIcon.value = true; // แสดงปุ่ม
+  showCartIcon.value = false;
 }
 
 // -----------------------------
@@ -343,13 +332,13 @@ const banners = ref([
 ]);
 
 const currentBanner = ref(0);
+let bannerInterval = null;
 
 const nextBanner = () => {
   if (banners.value.length) {
     currentBanner.value = (currentBanner.value + 1) % banners.value.length;
   }
 };
-
 const prevBanner = () => {
   if (banners.value.length) {
     currentBanner.value =
@@ -362,8 +351,12 @@ const prevBanner = () => {
 // -----------------------------
 onMounted(() => {
   fetchProducts();
+  if (process.client) {
+    bannerInterval = setInterval(nextBanner, 5000);
+  }
+});
 
-  // ✅ Start Auto Slide only if client
-  setInterval(nextBanner, 5000);
+onBeforeUnmount(() => {
+  if (bannerInterval) clearInterval(bannerInterval);
 });
 </script>
