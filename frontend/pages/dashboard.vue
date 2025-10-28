@@ -1,10 +1,9 @@
 <template>
   <Sidebar />
   <div class="flex min-h-screen bg-gray-900 text-white relative">
-    <!-- Cart Icon -->                                                            
+    <!-- Cart Icon -->
     <div v-if="showCartIcon" class="absolute top-4 right-6">
       <button class="relative" @click="goToProfile">
-
         <span class="text-3xl">🛒</span>
         <span
           v-if="cart.length"
@@ -19,8 +18,6 @@
     <main class="flex-1 p-8">
       <!-- Products Tab -->
       <div v-if="activeTab === 'products'">
-        
-
         <!-- 🖼️ Banner Carousel -->
         <div class="relative mb-8 mt-8">
           <div class="overflow-hidden rounded-xl shadow-lg">
@@ -47,23 +44,45 @@
               </div>
             </div>
           </div>
-  <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
+          <h2 class="text-xl font-bold mb-4">🛒 Products</h2>
           <!-- Navigation Buttons -->
           <button
             class="absolute top-1/2 -translate-y-1/2 left-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
             @click="prevBanner"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#ed9bff" d="m9.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675t-.15-.75t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#ed9bff"
+                d="m9.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675t-.15-.75t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z"
+              />
+            </svg>
           </button>
           <button
             class="absolute top-1/2 -translate-y-1/2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
             @click="nextBanner"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="#ed9bff" d="m14.475 12l-7.35-7.35q-.375-.375-.363-.888t.388-.887t.888-.375t.887.375l7.675 7.7q.3.3.45.675t.15.75t-.15.75t-.45.675l-7.7 7.7q-.375.375-.875.363T7.15 21.1t-.375-.888t.375-.887z"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="#ed9bff"
+                d="m14.475 12l-7.35-7.35q-.375-.375-.363-.888t.388-.887t.888-.375t.887.375l7.675 7.7q.3.3.45.675t.15.75t-.15.75t-.45.675l-7.7 7.7q-.375.375-.875.363T7.15 21.1t-.375-.888t.375-.887z"
+              />
+            </svg>
           </button>
 
           <!-- Indicators -->
-          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2">
+          <div
+            class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2"
+          >
             <span
               v-for="(banner, index) in banners"
               :key="'dot-' + index"
@@ -140,10 +159,21 @@
                 <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
               </div>
             </div>
-            <span class="font-semibold text-pink-400"
-              >฿{{ (item.price * item.quantity).toFixed(2) }}</span
-            >
+            <div class="flex items-center space-x-4">
+              <span class="font-semibold text-pink-400"
+                >฿{{ (item.price * item.quantity).toFixed(2) }}</span
+              >
+              <button
+                @click="removeFromCart(item)"
+                class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg font-semibold"
+              >
+                ✕
+              </button>
+              
+            </div>
           </div>
+        </div>
+        <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
           <p class="text-right font-bold mt-2">
             Total: ฿{{
               cart
@@ -151,8 +181,6 @@
                 .toFixed(2)
             }}
           </p>
-        </div>
-        <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
       </div>
     </main>
 
@@ -180,7 +208,6 @@
             alt="Product"
             class="w-full h-96 object-contain rounded-lg bg-gray-700"
           />
-
 
           <div class="flex gap-2 mt-4">
             <img
@@ -210,20 +237,19 @@
 
           <div class="flex gap-4">
             <button
-              class="bg-pink-600 hover:bg-white text-white  hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
+              class="bg-pink-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
               @click="addToCart(selectedProduct)"
             >
               🛒 เพิ่มลงตะกร้า
             </button>
             <NuxtLink
               to="/payment"
-              class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black  font-bold py-3 px-8 rounded-lg"
+              class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg"
             >
               💰 ซื้อเลย
             </NuxtLink>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -233,7 +259,7 @@
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 
-import Sidebar from '~/components/sidebar.vue'
+import Sidebar from "~/components/sidebar.vue";
 
 // -----------------------------
 // State
@@ -306,6 +332,23 @@ const addToCart = (product) => {
     cart.value.push({ ...product, quantity: 1 });
   }
   closeProduct();
+};
+
+const removeFromCart = (product) => {
+  console.log('Product to remove:', product); // Add this to debug
+  if (product && product.id) {
+    const existingIndex = cart.value.findIndex((item) => item.id === product.id);
+    if (existingIndex !== -1) {
+      // Decrease quantity or remove the item
+      if (cart.value[existingIndex].quantity > 1) {
+        cart.value[existingIndex].quantity -= 1;
+      } else {
+        cart.value.splice(existingIndex, 1);
+      }
+    }
+  } else {
+    console.error('Invalid product:', product);
+  }
 };
 
 // ---------------
