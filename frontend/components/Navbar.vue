@@ -23,6 +23,21 @@
         <img :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover" />
       </NuxtLink>
 
+      <!-- ปุ่มเปลี่ยนภาษา -->
+      <div class="relative">
+        <button @click="toggleLanguageMenu" class="text-white hover:scale-110 text-xl" title="Change Language">
+          🌐
+        </button>
+        <div v-if="showLanguageMenu" class="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg z-50">
+          <button @click="setLanguage('th')" class="w-full text-left px-4 py-2 hover:bg-gray-100 transition">
+            ภาษาไทย
+          </button>
+          <button @click="setLanguage('en')" class="w-full text-left px-4 py-2 hover:bg-gray-100 transition">
+            English
+          </button>
+        </div>
+      </div>
+
       <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
       <div v-if="user" class="relative">
         <button @click="toggleSettings" class="text-white hover:scale-110 text-xl" title="Settings">
@@ -115,6 +130,25 @@ const handleLogout = () => {
   router.push("/login");
   window.dispatchEvent(new Event("user-updated"));
 };
+
+// 🌐 ระบบเปลี่ยนภาษา
+const showLanguageMenu = ref(false);
+
+// toggle เมนูภาษา
+const toggleLanguageMenu = () => {
+  showLanguageMenu.value = !showLanguageMenu.value;
+  showSettings.value = false; // ปิดเมนู settings ถ้าเปิดอยู่
+};
+
+// เปลี่ยนภาษา
+const setLanguage = (lang) => {
+  console.log("เปลี่ยนเป็นภาษา:", lang);
+  // ถ้าใช้ i18n สามารถเพิ่มได้ทีหลัง เช่น locale.value = lang
+  showLanguageMenu.value = false;
+};
+
+
+
 
 onMounted(() => {
   loadUser();
