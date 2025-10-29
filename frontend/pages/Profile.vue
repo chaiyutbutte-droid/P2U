@@ -22,7 +22,7 @@
       <div class="md:w-1/4 space-y-5">
         <!-- Profile Info -->
         <div class="flex items-center space-x-6">
-          <div class="relative w-28 h-28 flex-shrink-0 z-50">
+          <div class="relative w-28 h-28 shrink-0 z-50">
             <img
               :src="user.profile_image_url || defaultProfile"
               alt="Profile"
@@ -301,7 +301,7 @@ const addToCart=(p)=>{
   if(ex) ex.quantity+=1
   else { let img=p.image||'/no-image.png'; if(!img.startsWith('http')) img=baseURL+img; cartItems.value.push({...p,image:img,quantity:1}) }
 }
-const cancelUpload = () => { previewImageUrl.value = null; selectedFile = null }
+
 
 // Logout
 
