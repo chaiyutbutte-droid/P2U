@@ -172,18 +172,26 @@
               >
                 ✕
               </button>
-              
             </div>
           </div>
         </div>
         <p v-else class="text-gray-400 text-center mt-4">Your cart is empty</p>
-          <p class="text-right font-bold mt-2">
-            Total: ฿{{
-              cart
-                .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                .toFixed(2)
-            }}
-          </p>
+        <p class="text-right font-bold mt-2">
+          Total: ฿{{
+            cart
+              .reduce((sum, item) => sum + item.price * item.quantity, 0)
+              .toFixed(2)
+          }}
+        </p>
+        <!-- Payment button  -->
+        <div v-if="cart.length" class="flex justify-end mt-4">
+          <NuxtLink
+            to="/payment"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-all"
+          >
+            💰 Checkout
+          </NuxtLink>
+        </div>
       </div>
     </main>
 
@@ -244,13 +252,13 @@
               class="bg-pink-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg flex-1"
               @click="addToCart(selectedProduct)"
             >
-              🛒 เพิ่มลงตะกร้า
+              🛒 Add to Cart
             </button>
             <NuxtLink
               to="/payment"
               class="flex-1 flex items-center justify-center bg-green-600 hover:bg-white text-white hover:text-black font-bold py-3 px-8 rounded-lg"
             >
-              💰 ซื้อเลย
+              💰 Buy Now
             </NuxtLink>
           </div>
         </div>
@@ -264,7 +272,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "axios";
 
 // ✅ แก้ import ให้ถูกต้อง
-import Sidebar from '~/components/sidebar.vue';
+import Sidebar from "~/components/sidebar.vue";
 
 // -----------------------------
 // State
@@ -337,7 +345,9 @@ const addToCart = (product) => {
 
 const removeFromCart = (product) => {
   if (product && product.id) {
-    const existingIndex = cart.value.findIndex((item) => item.id === product.id);
+    const existingIndex = cart.value.findIndex(
+      (item) => item.id === product.id
+    );
     if (existingIndex !== -1) {
       if (cart.value[existingIndex].quantity > 1) {
         cart.value[existingIndex].quantity -= 1;
@@ -346,7 +356,7 @@ const removeFromCart = (product) => {
       }
     }
   } else {
-    console.error('Invalid product:', product);
+    console.error("Invalid product:", product);
   }
 };
 
@@ -363,7 +373,8 @@ function goToProfile() {
 // -----------------------------
 const banners = ref([
   {
-    image: "https://affiliate.priceza.com/wp-content/uploads/2020/11/11.11_HotDealHotItem_HeroBanner.jpg",
+    image:
+      "https://affiliate.priceza.com/wp-content/uploads/2020/11/11.11_HotDealHotItem_HeroBanner.jpg",
     title: "SPRING / SUMMER COLLECTION 2025",
     subtitle: "Explore new digital art collections",
   },
@@ -373,12 +384,12 @@ const banners = ref([
     subtitle: "Grab exclusive deals before they're gone!",
   },
   {
-    image: "https://www.umipro.com/pub/media/wysiwyg/news-2024/NocNoc-8.8-_-__duragres_1440x365.jpg",
+    image:
+      "https://www.umipro.com/pub/media/wysiwyg/news-2024/NocNoc-8.8-_-__duragres_1440x365.jpg",
     title: "TOP SELLERS THIS WEEK",
     subtitle: "Check out the most popular items",
   },
 ]);
-
 
 const currentBanner = ref(0);
 let bannerInterval = null;

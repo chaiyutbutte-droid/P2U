@@ -49,7 +49,7 @@
         <button
           class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg"
         >
-          สั่งซื้อ
+          Buy
         </button>
       </NuxtLink>
     </div>
