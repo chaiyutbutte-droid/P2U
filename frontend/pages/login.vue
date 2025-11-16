@@ -1,6 +1,6 @@
 <template>
-  <div class="  flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black  " style="background-image: url(https://loud-tan-hvl9g0y5lo.edgeone.app/1.gif);  background-size: 100% 140%; height: 400px ; ">
-    <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl w-full max-w-sm">
+  <div class="  flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black  " style="background-image: url(https://artistic-scarlet-erufq5zade.edgeone.app/1.gif);  background-size: 100% 140%; height: 400px ; ">
+    <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl w-full max-w-sm  border-1 border-white">
       <h1 class="text-2xl font-bold text-white text-center font-serif">Welcome to</h1>
       <h1 class="text-2xl font-bold text-pink-500 text-center font-serif">P2UKaiser</h1>
       <p class="text-sm text-gray-400 text-center mb-6 mt-2">Log in to your account</p>
