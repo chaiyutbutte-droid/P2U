@@ -11,4 +11,12 @@ export default defineNuxtConfig({
 
   modules: ["@nuxtjs/i18n"],
   
+  app: {
+    head: {
+      link: [
+        { rel: 'stylesheet', href: 'https://cdn.boxicons.com/3.0.3/fonts/basic/boxicons.min.css' }
+      ]
+    }
+  }
+
 });

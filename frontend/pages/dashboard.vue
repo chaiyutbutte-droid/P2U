@@ -1,10 +1,10 @@
 <template>
-  <Sidebar />
+ <Banner1 v-if="activeTab !== 'profile'" />
   <div class="flex min-h-screen bg-gray-900 text-white relative">
     <!-- Cart Icon -->
-    <div v-if="showCartIcon" class="absolute top-4 right-6">
+     <div v-if="showCartIcon" class="absolute top-4 right-6">
       <button class="relative" @click="goToProfile">
-        <span class="text-3xl">🛒</span>
+        <span class="text-3xl hover:text-4xl duration-300">🛒</span>
         <span
           v-if="cart.length"
           class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
@@ -15,8 +15,8 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-1 p-8">
-     
+    <main class="flex-1 p-8 ">
+         
       <!-- Products Tab -->
       <div v-if="activeTab === 'products'">
         <!-- 🖼️ Banner Carousel -->
@@ -96,7 +96,7 @@
         <!-- หมวดหมู่ -->
     <Carta />
     <center>
-    <h2 class="text-xl font-bold mb-4 center">🛒 Products</h2>
+    <h2 class="text-xl font-bold mb-4 center mt-10 mb-5">🛒 Products</h2>
     </center>
         <!-- Product Grid -->
         <div
@@ -277,8 +277,9 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "axios";
 
 // ✅ แก้ import ให้ถูกต้อง
-import Sidebar from '~/components/Sidebar.vue';
+
 import Carta from "~/components/Carta.vue";
+import Banner1 from "~/components/banner1.vue";
 // -----------------------------
 // State
 // -----------------------------
@@ -415,7 +416,7 @@ const prevBanner = () => {
 // Lifecycle
 // -----------------------------
 onMounted(() => {
-  fetchProducts();
+fetchProducts();
   if (process.client) {
     bannerInterval = setInterval(nextBanner, 5000);
   }

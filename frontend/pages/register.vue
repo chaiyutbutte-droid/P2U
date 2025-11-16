@@ -1,11 +1,12 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black " style="background-image: url(https://wallpapers-clan.com/wp-content/uploads/2024/03/nezuko-glowing-eyes-demon-slayer-gif-desktop-wallpaper-preview.gif);">
-    <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl w-full max-w-sm">
-      <h1 class="text-2xl font-bold text-white text-center font-serif">Welcome to</h1>
-      <h1 class="text-2xl font-bold text-pink-500 text-center font-serif">P2UKaoser</h1>
-      <p class="text-sm text-gray-400 text-center mb-6 mt-2">Sign in to your account</p>
+  <div class="flex justify-between bg-gradient-to-br from-gray-900 to-black ">
+    <div class=" flex justify-center item-center min-h-screen  ml-50 w-1/2 backdrop-blur-sm p-8 shadow-xl max-w-sm">
+      <div class="text-center w-full">
+      <h1 class="text-2xl font-bold text-white  font-serif">Welcome to</h1>
+      <h1 class="text-2xl font-bold text-pink-500  font-serif">P2UKaiser</h1>
+      <p class="text-sm text-gray-400  mb-6 mt-2">Sign in to your account</p>
 
-      <div class="flex flex-col">
+      <div class="flex flex-col text-left gap-1">
         <label for="" class="text-white ms-3">Username</label>
         <input
           v-model="username"
@@ -80,9 +81,17 @@
         Already have an account?
         <router-link to="/login" class="text-white underline hover:text-sky-500">Log In here</router-link>
       </div>
-    </div>
+      </div>
+    </div>  
+<div class=" bg-pink-900  w-1/2  pt-60  p-50  min-h-screen">
+<div class=" flex flex-col   gap-6 pt-10 ">
+<span class="text-6xl font-bold text-white">Welcome!</span>
+<span class="  text-1xl  text-gray-300">We’re thrilled you’ve chosen to be a part of our community. Ready to get started?</span>
+  </div>
+</div>
   </div>
 </template>
+
 
 <script setup>
 import axios from 'axios';

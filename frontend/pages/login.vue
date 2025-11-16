@@ -1,34 +1,46 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black " style="background-image: url(https://wallpapers-clan.com/wp-content/uploads/2024/03/nezuko-glowing-eyes-demon-slayer-gif-desktop-wallpaper-preview.gif);">
+  <div class="  flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black  " style="background-image: url(https://loud-tan-hvl9g0y5lo.edgeone.app/1.gif);  background-size: 100% 140%; height: 400px ; ">
     <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl w-full max-w-sm">
       <h1 class="text-2xl font-bold text-white text-center font-serif">Welcome to</h1>
-      <h1 class="text-2xl font-bold text-pink-500 text-center font-serif">P2UKaoser</h1>
-      <p class="text-sm text-gray-400 text-center mb-6 mt-2">Sign in to your account</p>
+      <h1 class="text-2xl font-bold text-pink-500 text-center font-serif">P2UKaiser</h1>
+      <p class="text-sm text-gray-400 text-center mb-6 mt-2">Log in to your account</p>
 
-      <div class="flex flex-col">
+      
+      <div class="flex flex-col ">
         <label for="" class="text-white ms-3">Username</label>
+         <div class="relative">
         <input
           v-model="username"
           placeholder="Username"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
+          class="input-style  p-3 rounded-2xl border-0 border-b-2 bg-white border-gray-400 hover:bg-pink-200 focus:outline-none focus:border-b-4  focus:border-pink-600  "
           autocomplete="username"
+          style="width: 100%"  
+   
         />
+            <i class="bx bxs-user  absolute right-3 top-1/2 transform -translate-y-1/2 "></i>
+        </div>
+
 
         <label for="" class="text-white ms-3">Password</label>
+        <div class="relative">
         <input
           v-model="password"
           type="password"
           placeholder="Password"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:border-4 focus:outline-none focus:border-pink-600"
+          class="input-style  p-3 rounded-2xl border-0 border-b-2 bg-white border-gray-400  hover:bg-pink-200 focus:outline-none focus:border-b-4 focus:border-pink-600"
           autocomplete="current-password"
+          style="width: 100%" 
         />
+        <i class=" bxs-lock-keyhole bx-rotate-90'  absolute right-3 top-1/2 transform -translate-y-1/2   "></i>
+      </div>
       </div>
       
       <button
         @click="handleLogin"
-        class="bg-pink-600 hover:bg-pink-500 text-white font-semibold py-2 w-full rounded-lg transition duration-200 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:border-white mt-4"
+        class="bg-pink-600 group font-semibold py-2 w-full rounded-lg  focus:outline-none focus:ring-2 focus:ring-white focus:border-white mt-4 overflow-hidden relative "
       >
-        Log In
+        <span class="absolute inset-0 rounded-full bg-white 0 scale-0  group-hover:scale-110 transition-transform duration-100 origin-center"></span>
+        <span class="text-white relative group-hover:text-black  transition duration-500">Log In</span>
       </button>
 
       <p v-if="errorMsg" class="text-red-400 text-sm mt-4 text-center">

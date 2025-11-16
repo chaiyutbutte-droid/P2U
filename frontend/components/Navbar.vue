@@ -1,12 +1,11 @@
 <template>
   <nav class="bg-gradient-to-r from-black to-pink-950 text-white px-6 py-4 flex items-center shadow-md relative">
     <!-- ชื่อแอป -->
-    <NuxtLink to="/dashboard" class="font-bold text-2xl flex-shrink-0 transition transform hover:scale-110">
+    <NuxtLink :to="hideNavbar ? '#' : '/dashboard'"  class="font-bold text-2xl flex-shrink-0 transition transform hover:scale-110" >
       <span class="text-white transition-colors duration-300">P2U</span>
       <span class="text-pink-500 transition-colors duration-300">KAISER</span>
     </NuxtLink>
-
-    <!-- ช่อง search   -->
+    <!-- ช่อง search (ซ่อนในหน้า login หรือ register) -->
     <div v-if="!hideNavbar" class="ml-auto flex items-center bg-white rounded-md overflow-hidden w-1/2">
       <input v-model="searchQuery" @keyup.enter="handleSearch" type="text" placeholder="ค้นหาสินค้า"
         class="w-full px-4 py-2 text-black outline-none" />
@@ -14,6 +13,7 @@
         🔍
       </button>
     </div>
+    
 
     <div class="ml-auto flex items-center gap-4 relative">
       <!-- รูปโปรไฟล์ -->
@@ -22,8 +22,6 @@
         title="My Profile">
         <img :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover" />
       </NuxtLink>
-
-
 
       <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
       <div v-if="user" class="relative">
@@ -43,11 +41,6 @@
         </div>
       </div>
 
-      <!-- ปุ่ม Login ถ้าไม่ได้ล็อกอิน -->
-      <NuxtLink v-else to="/register"
-        class="text-white font-semibold px-4 py-2 border border-white rounded hover:bg-white hover:text-black transition">
-        Register
-      </NuxtLink>
     </div>
   </nav>
 </template>
@@ -118,22 +111,11 @@ const handleLogout = () => {
   window.dispatchEvent(new Event("user-updated"));
 };
 
-
-
-
-
-onMounted(() => {
-  loadUser()
-  window.addEventListener('user-updated', loadUser)
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('user-updated', loadUser)
-})
-
 onMounted(() => {
   loadUser();
   window.addEventListener("user-updated", loadUser);
 });
+
 onBeforeUnmount(() => {
   window.removeEventListener("user-updated", loadUser);
 });

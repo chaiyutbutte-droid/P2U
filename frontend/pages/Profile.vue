@@ -1,16 +1,12 @@
 <template>
 
-  <div
-    class="p-6 max-w-8xl mx-auto bg-black rounded-xl shadow-lg text-white mt-1 mb-1 mr-1 transition-all duration-300"
-    :class="expandSidebar ? 'ml-64' : 'ml-20'"
-  >
+  <div class="p-6 max-w-8xl mx-auto bg-black text-white mt-1 mb-1 mr-1 transition-all duration-300">
     <div class="md:w-1/4 space-y-5">
       <div class="flex items-center justify-center mb-6 relative">
         <h1 class="text-3xl font-extrabold text-center">
           My <span class="text-pink-600">Profile</span>
         </h1>
       </div>
-
     </div>
 
     <div>
@@ -58,7 +54,13 @@
             Register as Seller
           </button>
         </div>
-
+        <!-- เพิ่มปุ่ม Link ไปหน้า ai.vue ที่นี่ -->
+        <div class="mt-6">
+          <button @click="router.push('/ai')"
+            class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">
+            ไปยังหน้า AI
+          </button>
+        </div>
         <!-- Addresses -->
 
         <div class="w-full mt-8">
@@ -79,8 +81,8 @@
                 {{ addr.province }}, {{ addr.postal_code }}</p>
               <div class="mt-2 flex gap-2">
                 <button @click="editAddress(index)"
-
-                  class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition">{{ t('editAddress') }}</button>
+                  class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition">{{
+                    t('editAddress') }}</button>
                 <button @click="deleteAddress(index)"
                   class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition">Delete</button>
               </div>
@@ -94,7 +96,8 @@
             </h3>
             <form @submit.prevent="addOrUpdateAddress">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input v-model="newAddress.name" :placeholder="t('fullName')" type="text" class="input-field" required />
+                <input v-model="newAddress.name" :placeholder="t('fullName')" type="text" class="input-field"
+                  required />
                 <input v-model="newAddress.phone" :placeholder="t('phone')" type="text" class="input-field" required />
                 <input v-model="newAddress.address_line" placeholder="Address Line" type="text"
                   class="input-field col-span-2" required />
@@ -108,11 +111,11 @@
                 <label for="is_default" class="text-sm">Set as default address</label>
               </div>
               <button type="submit"
-
                 class="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">{{
                   isEditing ? t('updateAddress') : t('addAddress') }}</button>
               <button v-if="isEditing" @click="cancelEdit" type="button"
-                class="mt-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition">{{ t('cancel') }}</button>
+                class="mt-2 w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition">{{
+                  t('cancel') }}</button>
             </form>
           </div>
         </div>
@@ -168,7 +171,6 @@
           class="w-32 h-32 mx-auto object-cover rounded-full border border-gray-300 mb-4" />
         <div class="flex justify-center gap-4">
           <button @click="uploadConfirmed"
-
             class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded font-semibold">
             Upload
           </button>
@@ -212,7 +214,7 @@ let selectedFile = null
 
 
 // Address
-const newAddress = ref({ name:'', phone:'', address_line:'', district:'', province:'', postal_code:'', is_default:false })
+const newAddress = ref({ name: '', phone: '', address_line: '', district: '', province: '', postal_code: '', is_default: false })
 const isEditing = ref(false)
 const editingIndex = ref(null)
 
@@ -220,87 +222,87 @@ const editingIndex = ref(null)
 const cartItems = ref(JSON.parse(localStorage.getItem('cart') || '[]'))
 
 const formatImageUrl = (url) => url ? (url.startsWith('http') ? url : baseURL + url) : '/no-image.png'
-watch(cartItems, val => localStorage.setItem('cart', JSON.stringify(val)), { deep:true })
+watch(cartItems, val => localStorage.setItem('cart', JSON.stringify(val)), { deep: true })
 
 // Fetch profile
-onMounted(async ()=>{
-  try{
+onMounted(async () => {
+  try {
     const token = localStorage.getItem('token')
-    if(!token) throw new Error('No token found')
-    const res = await axios.get(baseURL+'/api/profile',{ headers:{ Authorization:`Bearer ${token}` } })
-    if(res.data.profile_image_url && !res.data.profile_image_url.startsWith('http')) res.data.profile_image_url = baseURL+res.data.profile_image_url
+    if (!token) throw new Error('No token found')
+    const res = await axios.get(baseURL + '/api/profile', { headers: { Authorization: `Bearer ${token}` } })
+    if (res.data.profile_image_url && !res.data.profile_image_url.startsWith('http')) res.data.profile_image_url = baseURL + res.data.profile_image_url
     user.value = res.data
-  }catch(e){ console.error(e); router.push('/login') }
+  } catch (e) { console.error(e); router.push('/login') }
 })
 
 
 // Address functions
-const addOrUpdateAddress = async ()=>{
-  errorMsg.value=''; successMsg.value=''
-  try{
+const addOrUpdateAddress = async () => {
+  errorMsg.value = ''; successMsg.value = ''
+  try {
     const token = localStorage.getItem('token')
     const endpoint = isEditing.value ? `${baseURL}/api/profile/address/${editingIndex.value}` : `${baseURL}/api/profile/address`
     const method = isEditing.value ? 'put' : 'post'
-    const res = await axios({method,url:endpoint,data:newAddress.value,headers:{Authorization:`Bearer ${token}`}})
+    const res = await axios({ method, url: endpoint, data: newAddress.value, headers: { Authorization: `Bearer ${token}` } })
     user.value.addresses = res.data.addresses
     successMsg.value = isEditing.value ? 'Address updated successfully.' : 'Address added successfully.'
     resetForm()
-  }catch(err){ console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to save address.' }
+  } catch (err) { console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to save address.' }
 }
-const editAddress = (i)=>{ newAddress.value={...user.value.addresses[i]}; isEditing.value=true; editingIndex.value=i }
-const cancelEdit = ()=>resetForm()
-const deleteAddress = async(i)=>{
-  if(confirm('Are you sure to delete this address?')){
-    errorMsg.value=''; successMsg.value=''
-    try{
+const editAddress = (i) => { newAddress.value = { ...user.value.addresses[i] }; isEditing.value = true; editingIndex.value = i }
+const cancelEdit = () => resetForm()
+const deleteAddress = async (i) => {
+  if (confirm('Are you sure to delete this address?')) {
+    errorMsg.value = ''; successMsg.value = ''
+    try {
       const token = localStorage.getItem('token')
-      const res = await axios.delete(`${baseURL}/api/profile/address/${i}`,{ headers:{Authorization:`Bearer ${token}`}})
+      const res = await axios.delete(`${baseURL}/api/profile/address/${i}`, { headers: { Authorization: `Bearer ${token}` } })
       user.value.addresses = res.data.addresses
-      successMsg.value='Address deleted successfully.'
-    }catch(err){ console.error(err); errorMsg.value=err.response?.data?.msg || 'Failed to delete address.' }
+      successMsg.value = 'Address deleted successfully.'
+    } catch (err) { console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to delete address.' }
   }
 }
-const resetForm = ()=>{ newAddress.value={name:'', phone:'', address_line:'', district:'', province:'', postal_code:'', is_default:false}; isEditing.value=false; editingIndex.value=null }
+const resetForm = () => { newAddress.value = { name: '', phone: '', address_line: '', district: '', province: '', postal_code: '', is_default: false }; isEditing.value = false; editingIndex.value = null }
 
 // Profile image
-const triggerFileInput=()=>fileInput.value.click()
-const onFileChange=(e)=>{
-  const file=e.target.files[0]
-  if(!file) return
-  if(previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
-  selectedFile=file
-  previewImageUrl.value=URL.createObjectURL(file)
+const triggerFileInput = () => fileInput.value.click()
+const onFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
+  selectedFile = file
+  previewImageUrl.value = URL.createObjectURL(file)
 }
-const uploadConfirmed=async ()=>{
-  errorMsg.value=''; successMsg.value=''
-  if(!selectedFile) return
-  const formData=new FormData(); formData.append('profile_image',selectedFile)
-  try{
+const uploadConfirmed = async () => {
+  errorMsg.value = ''; successMsg.value = ''
+  if (!selectedFile) return
+  const formData = new FormData(); formData.append('profile_image', selectedFile)
+  try {
     const token = localStorage.getItem('token')
-    const res = await axios.put(baseURL+'/api/profile/image',formData,{ headers:{Authorization:`Bearer ${token}`, 'Content-Type':'multipart/form-data'} })
-    let imageUrl=res.data.profile_image_url; if(imageUrl && !imageUrl.startsWith('http')) imageUrl=baseURL+imageUrl
-    user.value.profile_image_url=imageUrl
-    const storedUser=JSON.parse(localStorage.getItem('user')||'{}')
-    storedUser.profile_image_url=imageUrl
-    localStorage.setItem('user',JSON.stringify(storedUser))
-    successMsg.value='Profile image updated successfully.'
+    const res = await axios.put(baseURL + '/api/profile/image', formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } })
+    let imageUrl = res.data.profile_image_url; if (imageUrl && !imageUrl.startsWith('http')) imageUrl = baseURL + imageUrl
+    user.value.profile_image_url = imageUrl
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+    storedUser.profile_image_url = imageUrl
+    localStorage.setItem('user', JSON.stringify(storedUser))
+    successMsg.value = 'Profile image updated successfully.'
     window.dispatchEvent(new Event('user-updated'))
-  }catch(err){ console.error(err); errorMsg.value=err.response?.data?.msg || 'Failed to update profile image.' }
-  finally{ if(previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value); previewImageUrl.value=null; selectedFile=null }
+  } catch (err) { console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to update profile image.' }
+  finally { if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value); previewImageUrl.value = null; selectedFile = null }
 }
-const cancelUpload=()=>{ if(previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value); previewImageUrl.value=null; selectedFile=null }
+const cancelUpload = () => { if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value); previewImageUrl.value = null; selectedFile = null }
 
 // Cart
-const addToCart=(p)=>{
-  const ex = cartItems.value.find(i=>i.id===p.id)
-  if(ex) ex.quantity+=1
-  else { let img=p.image||'/no-image.png'; if(!img.startsWith('http')) img=baseURL+img; cartItems.value.push({...p,image:img,quantity:1}) }
+const addToCart = (p) => {
+  const ex = cartItems.value.find(i => i.id === p.id)
+  if (ex) ex.quantity += 1
+  else { let img = p.image || '/no-image.png'; if (!img.startsWith('http')) img = baseURL + img; cartItems.value.push({ ...p, image: img, quantity: 1 }) }
 }
 
 
 // Logout
 
-const handleLogout=()=>{
+const handleLogout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('username')
   localStorage.removeItem('user')
@@ -312,11 +314,11 @@ const handleLogout=()=>{
 
 // Language
 const currentLanguage = ref('th')
-const t=(key)=>{
-  const translations={
-    th:{ username:'ชื่อผู้ใช้', fullName:'ชื่อเต็ม', email:'อีเมล', phone:'เบอร์โทร', seller:'ผู้ขาย', registered:'ลงทะเบียนแล้ว', notRegistered:'ยังไม่ลงทะเบียน', addresses:'ที่อยู่', addNewAddress:'เพิ่มที่อยู่ใหม่', editAddress:'แก้ไขที่อยู่', addAddress:'เพิ่มที่อยู่', updateAddress:'อัปเดตที่อยู่', cancel:'ยกเลิก', trackOrder:'ติดตามคำสั่งซื้อ', myCart:'ตะกร้าของฉัน' },
-    en:{ username:'Username', fullName:'Full Name', email:'Email', phone:'Phone', seller:'Seller', registered:'Registered', notRegistered:'Not Registered', addresses:'Addresses', addNewAddress:'Add New Address', editAddress:'Edit Address', addAddress:'Add Address', updateAddress:'Update Address', cancel:'Cancel', trackOrder:'Track Order', myCart:'My Cart' }
+const t = (key) => {
+  const translations = {
+    th: { username: 'ชื่อผู้ใช้', fullName: 'ชื่อเต็ม', email: 'อีเมล', phone: 'เบอร์โทร', seller: 'ผู้ขาย', registered: 'ลงทะเบียนแล้ว', notRegistered: 'ยังไม่ลงทะเบียน', addresses: 'ที่อยู่', addNewAddress: 'เพิ่มที่อยู่ใหม่', editAddress: 'แก้ไขที่อยู่', addAddress: 'เพิ่มที่อยู่', updateAddress: 'อัปเดตที่อยู่', cancel: 'ยกเลิก', trackOrder: 'ติดตามคำสั่งซื้อ', myCart: 'ตะกร้าของฉัน' },
+    en: { username: 'Username', fullName: 'Full Name', email: 'Email', phone: 'Phone', seller: 'Seller', registered: 'Registered', notRegistered: 'Not Registered', addresses: 'Addresses', addNewAddress: 'Add New Address', editAddress: 'Edit Address', addAddress: 'Add Address', updateAddress: 'Update Address', cancel: 'Cancel', trackOrder: 'Track Order', myCart: 'My Cart' }
   }
-  return translations[currentLanguage.value][key]||key
+  return translations[currentLanguage.value][key] || key
 }
 </script>
