@@ -1,4 +1,5 @@
 <template>
+<sidebar/>
  <Banner1 v-if="activeTab !== 'profile'" />
   <div class="flex min-h-screen bg-gray-900 text-white relative">
     <!-- Cart Icon -->
@@ -277,7 +278,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import axios from "axios";
 
 // ✅ แก้ import ให้ถูกต้อง
-
+import sidebar from "~/components/sidebar.vue";
 import Carta from "~/components/Carta.vue";
 import Banner1 from "~/components/banner1.vue";
 // -----------------------------
