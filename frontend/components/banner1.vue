@@ -10,7 +10,7 @@ export default {
     return {
       fullText: [
         
-        'สินค้าคุณภาพมือสอง ราคาสุดคุ้ม ที่ P2U KAISER',
+        'สินค้าคุณภาพมือสอง ราคาสุดคุ้ม ที่  P2U KAISER',
         'ใครว่า ของมือสองไม่ดี? ที่ P2U KAISER ของมือสองก็มีคุณภาพ!',
         'มุ่งเน้นไปที่การคัดเลือกสินค้ามือสองที่มีคุณภาพ'
       ],
@@ -58,19 +58,19 @@ export default {
 
 <style scoped>
 .banner-container {
-  font-size: 3vw;
+  font-size: 2.5vw;
   font-weight: bold;
   color: white;
-  background-image: url('https://t3.ftcdn.net/jpg/07/21/25/58/360_F_721255853_NguzzZOsMtK9Uk4PH3CPq8EpsofZfTSU.jpg'); /* Your image path */
+  background-color:rgb(55, 2, 35);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   padding: 20px;
-  height: 50vh; /* Adjust container height */
+  height: 20vh; /* Adjust container height */
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center;  
 }
 
 span {

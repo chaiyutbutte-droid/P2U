@@ -2,135 +2,116 @@
   <div class="flex min-h-screen bg-gray-900 text-white">
     <!-- Left Side: Upload Section -->
     <main class="flex-1 p-8">
-      <div class="upload-container border-2">
-        <h2 class="title">Upload product images</h2>
-        <form @submit.prevent="handleSubmit" class="upload-form">
-          <input type="file" ref="image" accept="image/*" class="file-input" @change="previewImage" />
-          <button type="submit" class="upload-btn">Upload</button>
-        </form>
-        <div v-if="imagePreview" class="image-preview">
-          <h3>images:</h3>
-          <img :src="imagePreview" alt="Image Preview" class="preview-img" />
-        </div>
-      </div>
+      <div class="border-2 rounded-lg p-8 bg-gray-800 shadow-xl">
+        <h2 class="text-2xl font-bold mb-6 text-center">อัปโหลดภาพสินค้า</h2>
 
-      <div v-if="activeTab === 'products'">
-        <div class="product-container">
-          <div class="relative mb-8 mt-8">
-            <!-- 🖼️ Banner Carousel -->
-            <div class="overflow-hidden rounded-xl shadow-lg">
-              <div
-                class="flex transition-transform duration-500"
-                :style="{ transform: `translateX(-${currentBanner * 100}%)` }"
-              >
-                <div
-                  v-for="(banner, index) in banners"
-                  :key="index"
-                  class="min-w-full h-60 sm:h-72 md:h-80 bg-gray-700 relative"
-                >
-                  <img
-                    :src="banner.image"
-                    alt="Banner"
-                    class="w-full h-full object-cover"
-                    @error="banner.image = defaultImage"
-                  />
-                  <div
-                    class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/70 to-transparent p-4"
-                  >
-                    <h3 class="text-lg font-bold">{{ banner.title }}</h3>
-                    <p class="text-sm text-gray-300">{{ banner.subtitle }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              class="absolute top-1/2 -translate-y-1/2 left-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
-              @click="prevBanner"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="#ed9bff"
-                  d="m9.55 12l7.35 7.35q.375.375.363.875t-.388.875t-.875.375t-.875-.375l-7.7-7.675q-.3-.3-.45-.675t-.15-.75t.15-.75t.45-.675l7.7-7.7q.375-.375.888-.363t.887.388t.375.875t-.375.875z"
-                />
-              </svg>
-            </button>
-            <button
-              class="absolute top-1/2 -translate-y-1/2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full"
-              @click="nextBanner"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path
-                  fill="#ed9bff"
-                  d="m14.475 12l-7.35-7.35q-.375-.375-.363-.888t.388-.887t.888-.375t.887.375l7.675 7.7q.3.3.45.675t.15.75t-.15.75t-.45.675l-7.7 7.7q-.375.375-.875.363T7.15 21.1t-.375-.888t.375-.887z"
-                />
-              </svg>
-            </button>
-
-            <div
-              class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-2"
-            >
-              <span
-                v-for="(banner, index) in banners"
-                :key="'dot-' + index"
-                class="w-3 h-3 rounded-full"
-                :class="currentBanner === index ? 'bg-white' : 'bg-gray-400'"
-              ></span>
-            </div>
-          </div>
-
-          <div
-            v-if="allProducts.length"
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
+        <!-- Upload controls -->
+        <div class="flex flex-col items-center">
+          <label for="image" class="mb-4 text-lg font-semibold">
+            เลือกไฟล์ภาพ
+          </label>
+          
+          <input 
+            type="file" 
+            id="image"
+            accept="image/*" 
+            class="mb-4 p-3 bg-gray-700 text-white rounded-md cursor-pointer"
+            @change="previewImage"
+            :disabled="loading"
+          />
+          
+          <button 
+            @click="handleSubmit"
+            class="px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="loading || !selectedImage"
           >
-            <div
-              v-for="product in allProducts"
-              :key="product.id"
-              class="bg-gray-800 rounded-lg shadow-md p-4 cursor-pointer hover:bg-gray-700 transition"
-              @click="openProduct(product)"
-            >
-              <img
-                :src="product.image_url || defaultImage"
-                class="w-full h-40 object-cover rounded mb-3"
-                @error="product.image_url = defaultImage"
-              />
-              <h3 class="font-semibold">{{ product.name }}</h3>
-              <p class="text-sm text-gray-400">{{ product.description }}</p>
-              <p class="mt-2 font-bold text-indigo-400">฿{{ product.price }}</p>
-              <p class="text-sm text-gray-400 mt-1">
-                Seller: {{ product.seller.username }} | Shop:
-                {{ product.seller.shop_name || "N/A" }}
-              </p>
-            </div>
-          </div>
-          <p v-else class="text-gray-400 mt-16 text-center">
-            🔍 No products found.
-          </p>
+            {{ loading ? 'กำลังประมวลผล...' : 'อัปโหลด' }}
+          </button>
+        </div>
+
+        <!-- Error Message -->
+        <div v-if="error" class="mt-4 p-3 bg-red-600 text-white rounded-md text-center">
+          {{ error }}
+        </div>
+
+        <!-- Image Preview -->
+        <div v-if="imagePreview" class="mt-6">
+          <h3 class="text-xl font-semibold mb-3 text-center">ภาพที่อัปโหลด:</h3>
+          <img :src="imagePreview" alt="Image Preview" class="w-full max-w-md mx-auto rounded-md shadow-lg" />
         </div>
       </div>
     </main>
 
-    <!-- Right Side: n8n Data Display -->
-    <div class="bg-gray-800 h-full w-1/3 max-w-xs p-8 m-6 mt-8 border-4 border-pink-500 flex flex-col justify-between">
-      <h3 class="text-xl font-semibold mb-4">Data</h3>
-      <div v-if="productData">
-        <p><strong>ประเมินราคา:</strong> ฿{{ productData.price }}</p>
-        <p><strong>ประเภทสินค้า:</strong>{{ productData.category }}</p>
+    <!-- Right Side: Data Display -->
+    <div class="bg-gray-800 h-full w-1/3 max-w-xs p-8 m-6 mt-8 border-4 border-pink-500 flex flex-col overflow-auto">
+      <h3 class="text-xl font-semibold mb-4">ข้อมูลสินค้า</h3>
+
+      <div v-if="loading" class="flex flex-col items-center justify-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4"></div>
+        <p class="text-gray-400">กำลังวิเคราะห์ภาพ...</p>
       </div>
-      <p v-else class="text-gray-400">กรุณาอัปโหลดภาพสินค้าเพื่อรับข้อมูล</p>
+      
+      <div v-else-if="productData && productData.success" class="space-y-4">
+        <!-- Success indicator -->
+        <div class="bg-green-900 bg-opacity-30 border border-green-500 rounded-lg p-3 flex items-center">
+          <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-green-400 text-sm font-semibold">วิเคราะห์สำเร็จ</span>
+        </div>
+
+        <!-- Product analysis -->
+        <div class="bg-gray-700 rounded-lg p-4">
+          <h4 class="text-pink-400 font-bold mb-3 flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+            </svg>
+            รายละเอียดและการประเมินราคา
+          </h4>
+          <div class="text-sm text-gray-200 whitespace-pre-line leading-relaxed">
+            {{ productData.productData }}
+          </div>
+        </div>
+
+        <!-- Summary info -->
+        <div v-if="productData.summary" class="bg-gray-700 rounded-lg p-3 text-sm">
+          <div class="flex items-center text-gray-400">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            {{ productData.summary }}
+          </div>
+        </div>
+
+        <!-- Timestamp -->
+        <div v-if="productData.timestamp" class="text-xs text-gray-500 text-center">
+          {{ new Date(productData.timestamp).toLocaleString('th-TH') }}
+        </div>
+      </div>
+      
+      <div v-else class="flex flex-col items-center justify-center py-12 text-center">
+        <svg class="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+        <p class="text-gray-400 mb-2">กรุณาอัปโหลดภาพสินค้า</p>
+        <p class="text-gray-500 text-sm">เพื่อรับการวิเคราะห์และประเมินราคา</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import axios from "axios";
+import { ref } from 'vue';
 
+// Declare reactive variables
 const imagePreview = ref(null);
 const selectedImage = ref(null);
 const productData = ref(null);
+const loading = ref(false);
+const error = ref(null);
 
-// Handle file selection and preview
+// Handle image preview
 const previewImage = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -143,35 +124,84 @@ const previewImage = (event) => {
   }
 };
 
-// Handle form submission and upload to n8n
+// Handle form submission
 const handleSubmit = async () => {
-  const formData = new FormData();
-  if (selectedImage.value) {
-    formData.append('productImage', selectedImage.value);
-    await uploadImageToN8n(formData);
+  if (!selectedImage.value) {
+    error.value = 'กรุณาเลือกไฟล์ภาพ';
+    return;
   }
-};
 
-// Upload image to n8n webhook
-const uploadImageToN8n = async (formData) => {
+  loading.value = true;
+  error.value = null;
+  productData.value = null; // Clear previous data
+
+  const formData = new FormData();
+  formData.append('productImage', selectedImage.value);
+
   try {
-    const response = await fetch('http://localhost:5678/webhook-test/upload-image', {
+    // Step 1: Upload to n8n
+    console.log('📤 Uploading to n8n...');
+    const n8nResponse = await fetch('http://localhost:5678/webhook/upload-image', {
       method: 'POST',
       body: formData,
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Upload successful', result);
-      
-      // Set product data for display
-      productData.value = result;
-    } else {
-      alert('เกิดข้อผิดพลาดในการประเมิน');
+    if (!n8nResponse.ok) {
+      throw new Error('เกิดข้อผิดพลาดในการอัปโหลดไปยัง n8n');
     }
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    alert('เกิดข้อผิดพลาดในการอัปโหลด');
+
+    const n8nResult = await n8nResponse.json();
+    console.log('✅ n8n result:', n8nResult);
+    console.log('🔍 n8n result type:', typeof n8nResult);
+    console.log('🔍 n8n result keys:', Object.keys(n8nResult));
+
+    // Try to find the data in various possible fields
+    const extractedData = n8nResult.productData || 
+                         n8nResult.text || 
+                         n8nResult.data || 
+                         n8nResult.result ||
+                         JSON.stringify(n8nResult);
+
+    console.log('🔍 Extracted data:', extractedData);
+
+    if (!extractedData) {
+      throw new Error('ไม่มีข้อมูลจาก n8n');
+    }
+
+    // Step 2: Send to internal Nuxt API (use relative path)
+    console.log('📤 Sending to API...');
+    const apiResponse = await fetch('/api/ai', {  // Changed: Use internal API
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productDetails: extractedData }),
+    });
+
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง API: ${apiResponse.status}`);
+    }
+
+    const apiResult = await apiResponse.json();
+    console.log('✅ API Response:', apiResult);
+    console.log('🔍 API Response type:', typeof apiResult);
+    console.log('🔍 API Response keys:', Object.keys(apiResult));
+    console.log('🔍 productData field exists?', 'productData' in apiResult);
+    console.log('🔍 productData value:', apiResult.productData);
+
+    // Store the result
+    productData.value = apiResult;
+    
+    // Force update check
+    console.log('🔍 Vue productData after setting:', productData.value);
+    console.log('🔍 Vue productData is null?', productData.value === null);
+  } catch (err) {
+    console.error('❌ Error:', err);
+    error.value = err.message || 'เกิดข้อผิดพลาดในการประมวลผล';
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -184,11 +214,14 @@ const uploadImageToN8n = async (formData) => {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  border-radius: 10px;
+  background-color: #2d2d2d;
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 2rem;
   margin-bottom: 20px;
+  color: #fff;
 }
 
 .upload-form {
@@ -200,6 +233,10 @@ const uploadImageToN8n = async (formData) => {
 .file-input {
   padding: 10px;
   margin-bottom: 15px;
+  background-color: #444;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 .upload-btn {
@@ -219,9 +256,10 @@ const uploadImageToN8n = async (formData) => {
 }
 
 .preview-img {
-  width: 200px
+  width: 200px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
-.bg-gray-800 {
-};
 </style>
+

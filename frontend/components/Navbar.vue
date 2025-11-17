@@ -1,72 +1,85 @@
 <template>
-  <nav class="bg-gradient-to-r from-black to-pink-950 text-white px-6 py-4 flex items-center shadow-md relative">
-    <!-- ชื่อแอป -->
-    <NuxtLink :to="hideNavbar ? '#' : '/dashboard'"  class="font-bold text-2xl flex-shrink-0 transition transform hover:scale-110" >
-      <span class="text-white transition-colors duration-300">P2U</span>
-      <span class="text-pink-500 transition-colors duration-300">KAISER</span>
-    </NuxtLink>
-    <!-- ช่อง search (ซ่อนในหน้า login หรือ register) -->
-    <div v-if="!hideNavbar" class="ml-auto flex items-center bg-white rounded-md overflow-hidden w-1/2">
-      <input v-model="searchQuery" @keyup.enter="handleSearch" type="text" placeholder="ค้นหาสินค้า"
-        class="w-full px-4 py-2 text-black outline-none" />
-      <button @click="handleSearch" class="bg-pink-600 text-white px-4 py-2 hover:bg-pink-700 transition">
-        🔍
-      </button>
-    </div>
-    
-
-    <div class="ml-auto flex items-center gap-4 relative">
-      <!-- รูปโปรไฟล์ -->
-      <NuxtLink v-if="user" to="/profile"
-        class="w-9 h-9 rounded-full overflow-hidden border-2 border-white hover:scale-105 transition"
-        title="My Profile">
-        <img :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover" />
+  <div>
+    <!-- Top Navigation Bar -->
+    <nav class="bg-gradient-to-r from-black to-pink-950 text-white px-6 py-4 flex items-center shadow-md relative">
+      <!-- Logo -->
+      <NuxtLink :to="hideNavbar ? '#' : '/dashboard'" class="font-bold text-2xl flex-shrink-0 transition transform hover:scale-110">
+        <span class="text-white transition-colors duration-300">P2U</span>
+        <span class="text-pink-500 transition-colors duration-300">KAISER</span>
       </NuxtLink>
-
-      <!-- เมนูฟันเฟือง (เฉพาะตอนล็อกอิน) -->
-      <div v-if="user" class="relative">
-        <button @click="toggleSettings" class="text-white hover:scale-110 text-xl" title="Settings">
-          ⚙️
+      
+      <!-- Search Bar (Centered) -->
+      <div v-if="!hideNavbar" class="absolute left-1/2 transform -translate-x-1/2 flex items-center bg-white rounded-2xl overflow-hidden w-1/2 ">
+        <input v-model="searchQuery" @keyup.enter="handleSearch" type="text" placeholder="ค้นหาสินค้า"
+          class="w-full px-4 py-2 text-black outline-none" />
+        <button @click="handleSearch" class="bg-pink-600 text-white px-4 py-2 hover:bg-pink-700 transition transform hover:scale-110">
+          🔍
         </button>
-        <div v-if="showSettings" class="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg z-50">
-          <NuxtLink to="/about">
-            <button class="rounded-xl w-full text-left px-4 py-2 hover:bg-gray-100 transition">
-              About
-            </button>
-          </NuxtLink>
-
-          <button @click="handleLogout" class="w-full text-left px-4 py-2 hover:bg-gray-100 transition">
-            Logout
-          </button>
-        </div>
       </div>
 
-    </div>
-  </nav>
+      <div class="ml-auto flex items-center gap-4 relative">
+        <!-- Profile Picture -->
+        <NuxtLink v-if="!hideNavbar && user" to="/profile"
+          class="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-900 hover:scale-105 transition bg-white"
+          title="My Profile">
+          <img :src="profileImageUrl" alt="Profile" class="w-full h-full object-cover" />
+        </NuxtLink>
+
+        <!-- Settings Menu -->
+        <div v-if="!hideNavbar && user" class="relative">
+          <button @click="toggleSettings" class="text-amber-900 hover:scale-110 text-2xl" title="Settings">
+            ⚙️
+          </button>
+          <div v-if="showSettings" class="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg z-50">
+            <NuxtLink to="/about">
+              <button class="rounded-xl w-full text-left px-4 py-2 hover:bg-gray-100 transition">
+                About
+              </button>
+            </NuxtLink>
+            <button @click="handleLogout" class="w-full text-left px-4 py-2 hover:bg-gray-100 transition">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Secondary Brown Navigation Bar -->
+    <nav v-if="!hideNavbar" class="bg-pink-900 text-white  text-1xl px-6 py-3 flex justify-center items-center gap-10 shadow-md   ">
+      <NuxtLink to="/dashboard" class=" hover:scale-140   transform  transition font-semibold">
+        หน้าแรก
+      </NuxtLink>
+      <NuxtLink to="/books" class="  hover:scale-140 transform transition font-semibold">
+        สินค้า
+      </NuxtLink>
+      <NuxtLink to="/about" class=" hover:scale-140 transform transition font-semibold">
+        เกี่ยวกับ
+      </NuxtLink>
+      <NuxtLink to="/help" class=" hover:scale-140 transform transition font-semibold">
+        ช่วยเหลือ
+      </NuxtLink>
+    </nav>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { useRouter, useRoute } from "vue-router"; // เพิ่ม useRoute ด้วย
+import { useRouter, useRoute } from "vue-router";
 
-const route = useRoute(); // เพิ่มบรรทัดนี้เพื่อดึง path ปัจจุบัน
-
+const route = useRoute();
 const router = useRouter();
 const user = ref(null);
 const showSettings = ref(false);
 const searchQuery = ref("");
 
-// ฟังก์ชันค้นหา
 const handleSearch = () => {
   if (!searchQuery.value.trim()) return;
-
   router.push({
     path: "/dashboard",
     query: { q: searchQuery.value.trim() },
   });
 };
 
-// ซ่อนถ้าหน้าเป็น login หรือ register
 const hideNavbar = computed(() => {
   const hiddenPages = ["/login", "/register"];
   return hiddenPages.includes(route.path);
@@ -100,7 +113,6 @@ const toggleSettings = () => {
   showSettings.value = !showSettings.value;
 };
 
-// กด Logout
 const handleLogout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("username");

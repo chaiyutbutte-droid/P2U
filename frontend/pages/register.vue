@@ -83,10 +83,10 @@
       </div>
       </div>
     </div>  
-<div class=" bg-pink-900  w-1/2  pt-60  p-50  min-h-screen">
-<div class=" flex flex-col   gap-6 pt-10 ">
-<span class="text-6xl font-bold text-white">Welcome!</span>
-<span class="  text-1xl  text-gray-300">We’re thrilled you’ve chosen to be a part of our community. Ready to get started?</span>
+<div class =" bg-pink-900  w-1/2  pt-60  p-50  min-h-screen">
+<div class =" flex flex-col   gap-6 pt-10 ">
+<span class = "text-6xl font-bold text-white">Welcome!</span>
+<span class = "  text-1xl  text-gray-300">We’re thrilled you’ve chosen to be a part of our community. Ready to get started?</span>
   </div>
 </div>
   </div>

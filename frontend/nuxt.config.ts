@@ -7,6 +7,11 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+      server: {
+      allowedHosts: [
+        'nonguttural-unfanned-shandi.ngrok-free.dev', // เพิ่มโฮสต์ที่ถูกบล็อก
+      ],
+    },
   },
 
   modules: ["@nuxtjs/i18n"],
@@ -20,3 +25,4 @@ export default defineNuxtConfig({
   }
 
 });
+
