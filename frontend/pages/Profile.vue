@@ -58,7 +58,7 @@
         <div class="mt-6">
           <button @click="router.push('/ai')"
             class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">
-            ไปยังหน้า AI
+            ไปยังหน้าประเมินสินค้า
           </button>
         </div>
         <!-- Addresses -->
@@ -127,7 +127,7 @@
         <!-- Track Order -->
         <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">{{ t('trackOrder') }}</h2>
         <div class="bg-gray-800 rounded-lg p-4 shadow-inner min-h-48 flex items-center justify-center text-gray-400">
-          <p>Tracking information will appear here.</p>
+          <p>ข้อมูลการติดตามจะปรากฏที่นี่</p>
         </div>
 
 
@@ -145,9 +145,11 @@
             </div>
             <span class="font-semibold text-pink-400">{{ item.price }} ฿</span>
           </div>
-          <button class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg mt-2">Go to Checkout</button>
+           <NuxtLink to="/payment">
+          <button class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg mt-2">ไปที่หน้าชำระเงิน</button>
+          </NuxtLink>
         </div>
-        <div v-else class="text-gray-400 text-sm text-center">Your cart is empty</div>
+        <div v-else class="text-gray-400 text-sm text-center">รถเข็นของคุณว่างเปล่า</div>
       </div>
     </div>
 
@@ -155,9 +157,9 @@
     <div class="md:w-1/4 space-y-5 mt-4">
       <button @click="handleLogout"
         class="mt-8 w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">
-        Logout
+        ออกจากระบบ
       </button>
-      <div v-if="!user" class="text-center text-gray-400 mt-10">Loading...</div>
+      <div v-if="!user" class="text-center text-gray-400 mt-10">โหลด...</div>
     </div>
 
     <p v-if="errorMsg" class="text-red-400 text-center mt-4">{{ errorMsg }}</p>

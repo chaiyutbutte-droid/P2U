@@ -4,8 +4,7 @@
   >
     <!-- หัวข้อ -->
     <div
-      class="text-center text-4xl font-semibold mb-10 hover:scale-110 underline"
-    >
+      class="text-center text-4xl font-semibold  mb-10 hover:scale-110  ">
       Creator
     </div>
 

@@ -6,26 +6,45 @@
         <h2 class="text-2xl font-bold mb-6 text-center">อัปโหลดภาพสินค้า</h2>
 
         <!-- Upload controls -->
-        <div class="flex flex-col items-center">
+        <div class="flex flex-col opeitems-center">
           <label for="image" class="mb-4 text-lg font-semibold">
             เลือกไฟล์ภาพ
           </label>
-          
-          <input 
-            type="file" 
-            id="image"
-            accept="image/*" 
-            class="mb-4 p-3 bg-gray-700 text-white rounded-md cursor-pointer"
-            @change="previewImage"
-            :disabled="loading"
-          />
-          
-          <button 
-            @click="handleSubmit"
-            class="px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="loading || !selectedImage"
-          >
-            {{ loading ? 'กำลังประมวลผล...' : 'อัปโหลด' }}
+          <input type="file" id="image" accept="image/*"
+            class="mb-4 p-3 bg-gray-700 text-white rounded-md cursor-pointer" @change="previewImage"
+            :disabled="loading" />
+
+          <!-- Camera Button -->
+          <button @click="openCamera"
+            class="w-full mb-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            :disabled="loading || showCamera">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z"
+                clip-rule="evenodd" />
+            </svg>
+            {{ showCamera ? "กล้องเปิดอยู่..." : "เปิดกล้องถ่ายรูป" }}
+          </button>
+
+          <!-- Camera View -->
+          <div v-if="showCamera" class="mb-4 bg-black rounded-lg overflow-hidden">
+            <video ref="videoElement" autoplay playsinline class="w-full"></video>
+            <div class="flex gap-2 p-3 bg-gray-700">
+              <button @click="capturePhoto"
+                class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-500 transition">
+                📸 ถ่ายรูป
+              </button>
+              <button @click="closeCamera"
+                class="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-500 transition">
+                ❌ ปิดกล้อง
+              </button>
+            </div>
+          </div>
+
+          <button @click="handleSubmit"
+            class="w-full px-6 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="loading || !selectedImage">
+            {{ loading ? "กำลังประมวลผล..." : "อัปโหลด" }}
           </button>
         </div>
 
@@ -40,7 +59,27 @@
           <img :src="imagePreview" alt="Image Preview" class="w-full max-w-md mx-auto rounded-md shadow-lg" />
         </div>
       </div>
+
+
+
+<div class="flex justify-center mt-10">
+  <div class="bg-gray-800 border-4 border-pink-500 w-1/2  p-4">
+    <h3 class="text-center font-semibold mt-1 text-2xl mb-3">ราคา</h3>
+    <div class="text-sm text-gray-200 whitespace-pre-line leading-relaxed">
+      <div v-if="loading" class="text-center text-gray-400">
+        กำลังโหลด...
+      </div>
+      <div v-else-if="priceData" class="p-3 text-xl font-bold text-center">
+        {{ priceData }}
+      </div>
+      <div v-else class="text-center text-gray-400">
+        ยังไม่มีข้อมูลราคา
+      </div>
+    </div>
+  </div>
+</div>
     </main>
+
 
     <!-- Right Side: Data Display -->
     <div class="bg-gray-800 h-full w-1/3 max-w-xs p-8 m-6 mt-8 border-4 border-pink-500 flex flex-col overflow-auto">
@@ -50,12 +89,14 @@
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mb-4"></div>
         <p class="text-gray-400">กำลังวิเคราะห์ภาพ...</p>
       </div>
-      
+
       <div v-else-if="productData && productData.success" class="space-y-4">
         <!-- Success indicator -->
         <div class="bg-green-900 bg-opacity-30 border border-green-500 rounded-lg p-3 flex items-center">
           <svg class="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd" />
           </svg>
           <span class="text-green-400 text-sm font-semibold">วิเคราะห์สำเร็จ</span>
         </div>
@@ -64,8 +105,10 @@
         <div class="bg-gray-700 rounded-lg p-4">
           <h4 class="text-pink-400 font-bold mb-3 flex items-center">
             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+              <path fill-rule="evenodd"
+                d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                clip-rule="evenodd" />
             </svg>
             รายละเอียดและการประเมินราคา
           </h4>
@@ -78,7 +121,9 @@
         <div v-if="productData.summary" class="bg-gray-700 rounded-lg p-3 text-sm">
           <div class="flex items-center text-gray-400">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+              <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clip-rule="evenodd" />
             </svg>
             {{ productData.summary }}
           </div>
@@ -86,13 +131,14 @@
 
         <!-- Timestamp -->
         <div v-if="productData.timestamp" class="text-xs text-gray-500 text-center">
-          {{ new Date(productData.timestamp).toLocaleString('th-TH') }}
+          {{ new Date(productData.timestamp).toLocaleString("th-TH") }}
         </div>
       </div>
-      
+
       <div v-else class="flex flex-col items-center justify-center py-12 text-center">
         <svg class="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
         <p class="text-gray-400 mb-2">กรุณาอัปโหลดภาพสินค้า</p>
         <p class="text-gray-500 text-sm">เพื่อรับการวิเคราะห์และประเมินราคา</p>
@@ -102,7 +148,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from "vue";
+
+const videoElement = ref(null);
+const showCamera = ref(false);
+const priceMatch = ref(null)
+const priceData = ref(null);
 
 // Declare reactive variables
 const imagePreview = ref(null);
@@ -111,7 +162,38 @@ const productData = ref(null);
 const loading = ref(false);
 const error = ref(null);
 
-// Handle image preview
+// Ensure videoElement is found after mounting
+onMounted(() => {
+  if (!videoElement.value) {
+    console.error("videoElement is not found!");
+  }
+});
+
+const openCamera = async () => {
+  try {
+    showCamera.value = true;
+    // Wait for next tick to ensure video element is rendered
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+    });
+
+    if (videoElement.value) {
+      videoElement.value.srcObject = stream;
+    } else {
+      console.error("videoElement is still not available");
+      error.value = "ไม่สามารถเข้าถึงกล้องได้";
+    }
+  } catch (err) {
+    console.error("ไม่สามารถเปิดกล้องได้:", err);
+    error.value = "ไม่สามารถเปิดกล้องได้: " + err.message;
+    showCamera.value = false;
+  }
+};
+
+
+
 const previewImage = (event) => {
   const file = event.target.files[0];
   if (file) {
@@ -127,7 +209,7 @@ const previewImage = (event) => {
 // Handle form submission
 const handleSubmit = async () => {
   if (!selectedImage.value) {
-    error.value = 'กรุณาเลือกไฟล์ภาพ';
+    error.value = "กรุณาเลือกไฟล์ภาพ";
     return;
   }
 
@@ -136,73 +218,118 @@ const handleSubmit = async () => {
   productData.value = null; // Clear previous data
 
   const formData = new FormData();
-  formData.append('productImage', selectedImage.value);
+  formData.append("productImage", selectedImage.value, "captured-image.png");
 
   try {
     // Step 1: Upload to n8n
-    console.log('📤 Uploading to n8n...');
-    const n8nResponse = await fetch('http://localhost:5678/webhook/upload-image', {
-      method: 'POST',
-      body: formData,
-    });
+    console.log("📤 Uploading to n8n...");
+    const n8nResponse = await fetch(
+      "http://localhost:5678/webhook/upload-image",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     if (!n8nResponse.ok) {
-      throw new Error('เกิดข้อผิดพลาดในการอัปโหลดไปยัง n8n');
+      throw new Error("เกิดข้อผิดพลาดในการอัปโหลดไปยัง n8n");
     }
 
     const n8nResult = await n8nResponse.json();
-    console.log('✅ n8n result:', n8nResult);
-    console.log('🔍 n8n result type:', typeof n8nResult);
-    console.log('🔍 n8n result keys:', Object.keys(n8nResult));
+    console.log("✅ n8n result:", n8nResult);
+    console.log("🔍 n8n result type:", typeof n8nResult);
+    console.log("🔍 n8n result keys:", Object.keys(n8nResult));
 
     // Try to find the data in various possible fields
-    const extractedData = n8nResult.productData || 
-                         n8nResult.text || 
-                         n8nResult.data || 
-                         n8nResult.result ||
-                         JSON.stringify(n8nResult);
+    const extractedData =
+      n8nResult.productData ||
+      n8nResult.text ||
+      n8nResult.data ||
+      n8nResult.result ||
+      JSON.stringify(n8nResult);
 
-    console.log('🔍 Extracted data:', extractedData);
+    console.log("🔍 Extracted data:", extractedData);
 
     if (!extractedData) {
-      throw new Error('ไม่มีข้อมูลจาก n8n');
+      throw new Error("ไม่มีข้อมูลจาก n8n");
     }
 
     // Step 2: Send to internal Nuxt API (use relative path)
-    console.log('📤 Sending to API...');
-    const apiResponse = await fetch('/api/ai', {  // Changed: Use internal API
-      method: 'POST',
+    console.log("📤 Sending to API...");
+    const apiResponse = await fetch("/api/ai", {
+      // Changed: Use internal API
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ productDetails: extractedData }),
     });
 
     if (!apiResponse.ok) {
       const errorText = await apiResponse.text();
-      console.error('API Error Response:', errorText);
-      throw new Error(`เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง API: ${apiResponse.status}`);
+      console.error("API Error Response:", errorText);
+      throw new Error(
+        `เกิดข้อผิดพลาดในการส่งข้อมูลไปยัง API: ${apiResponse.status}`
+      );
     }
 
     const apiResult = await apiResponse.json();
-    console.log('✅ API Response:', apiResult);
-    console.log('🔍 API Response type:', typeof apiResult);
-    console.log('🔍 API Response keys:', Object.keys(apiResult));
-    console.log('🔍 productData field exists?', 'productData' in apiResult);
-    console.log('🔍 productData value:', apiResult.productData);
+    console.log("✅ API Response:", apiResult);
+    console.log("🔍 API Response type:", typeof apiResult);
+    console.log("🔍 API Response keys:", Object.keys(apiResult));
+    console.log("🔍 productData field exists?", "productData" in apiResult);
+    console.log("🔍 productData value:", apiResult.productData);
 
     // Store the result
     productData.value = apiResult;
-    
+    const text = apiResult?.productData || '';
+    const priceMatch = text.match(/ราคาสินค้า[^:]*:\s*([^\n]+)/i);
+    priceData.value = priceMatch ? priceMatch[1].trim() : "ไม่พบข้อมูลราคา";
+
     // Force update check
-    console.log('🔍 Vue productData after setting:', productData.value);
-    console.log('🔍 Vue productData is null?', productData.value === null);
+    console.log("🔍 Vue productData after setting:", productData.value);
+    console.log("🔍 Vue productData is null?", productData.value === null);
   } catch (err) {
-    console.error('❌ Error:', err);
-    error.value = err.message || 'เกิดข้อผิดพลาดในการประมวลผล';
+    console.error("❌ Error:", err);
+    error.value = err.message || "เกิดข้อผิดพลาดในการประมวลผล";
   } finally {
     loading.value = false;
   }
+};
+
+const capturePhoto = () => {
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  const video = videoElement.value;
+
+  // ตั้งขนาด canvas ให้ตรงกับขนาดของวิดีโอ
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  // วาดเฟรมปัจจุบันจากวิดีโอลงใน canvas
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // แปลง canvas เป็น Blob (Binary)
+  canvas.toBlob((blob) => {
+    if (blob) {
+      // อัพเดท selectedImage และ imagePreview ให้เป็น Blob
+      selectedImage.value = blob;
+      const imageUrl = URL.createObjectURL(blob);
+      imagePreview.value = imageUrl;  // แสดงภาพพรีวิว
+    } else {
+      console.error("ไม่สามารถแปลงภาพเป็น Blob");
+    }
+  }, "image/png");
+};
+
+const closeCamera = () => {
+  if (videoElement.value && videoElement.value.srcObject) {
+    const stream = videoElement.value.srcObject;
+    const tracks = stream.getTracks();
+    tracks.forEach((track) => track.stop());
+    videoElement.value.srcObject = null;
+  }
+  showCamera.value = false;
 };
 </script>
 
@@ -241,7 +368,7 @@ const handleSubmit = async () => {
 
 .upload-btn {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 4px;
@@ -262,4 +389,3 @@ const handleSubmit = async () => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 </style>
-

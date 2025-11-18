@@ -49,7 +49,7 @@
       <NuxtLink to="/dashboard" class=" hover:scale-140   transform  transition font-semibold">
         หน้าแรก
       </NuxtLink>
-      <NuxtLink to="/books" class="  hover:scale-140 transform transition font-semibold">
+      <NuxtLink to="/shop" class="  hover:scale-140 transform transition font-semibold">
         สินค้า
       </NuxtLink>
       <NuxtLink to="/about" class=" hover:scale-140 transform transition font-semibold">

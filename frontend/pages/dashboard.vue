@@ -24,7 +24,7 @@
         <!-- Hover Tooltip -->
         <span
           class="absolute right-20 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-sm font-medium px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 group-hover:right-[75px] transition-all duration-300 whitespace-nowrap shadow-xl pointer-events-none">
-          My Cart
+          ตะกร้า
           <span
             class="absolute right-[-6px] top-1/2 -translate-y-1/2 w-0 h-0 border-l-[6px] border-l-gray-900 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent"></span>
         </span>
@@ -83,7 +83,7 @@
         <!-- หมวดหมู่ -->
         <Carta />
         <center>
-          <h2 class="text-xl font-bold mb-4  mt-10 mb-5">🛒 Products</h2>
+          <h2 class="text-xl font-bold mb-4  mt-10 mb-5">🛒 สินค้า</h2>
         </center>
         <!-- Product Grid -->
         <div v-if="allProducts.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">

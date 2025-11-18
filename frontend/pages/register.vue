@@ -2,12 +2,12 @@
   <div class="flex justify-between bg-gradient-to-br from-gray-900 to-black ">
     <div class=" flex justify-center item-center min-h-screen  ml-50 w-1/2 backdrop-blur-sm p-8 shadow-xl max-w-sm">
       <div class="text-center w-full">
-      <h1 class="text-2xl font-bold text-white  font-serif">Welcome to</h1>
+      <h1 class="text-2xl font-bold text-white  font-serif">ยินดีต้อนรับ</h1>
       <h1 class="text-2xl font-bold text-pink-500  font-serif">P2UKaiser</h1>
-      <p class="text-sm text-gray-400  mb-6 mt-2">Sign in to your account</p>
+      <p class="text-sm text-gray-400  mb-6 mt-2">ลงชื่อเข้าใช้บัญชีของคุณ</p>
 
       <div class="flex flex-col text-left gap-1">
-        <label for="" class="text-white ms-3">Username</label>
+        <label for="" class="text-white ms-3">ชื่อผู้ใช้</label>
         <input
           v-model="username"
           placeholder="Username"
@@ -15,7 +15,7 @@
           autocomplete="username"
         />
 
-        <label for="" class="text-white ms-3">Email</label>
+        <label for="" class="text-white ms-3">อีเมล</label>
         <input
           v-model="email"
           type="email"
@@ -24,7 +24,7 @@
           autocomplete="email"
         />
 
-        <label for="" class="text-white ms-3">Password</label>
+        <label for="" class="text-white ms-3">รหัสผ่าน</label>
         <input
           v-model="password"
           type="password"
@@ -33,7 +33,7 @@
           autocomplete="new-password"
         />
 
-        <label for="" class="text-white ms-3">Confirm Password</label>
+        <label for="" class="text-white ms-3">ยืนยันรหัสผ่าน</label>
         <input
           v-model="confirmPassword"
           type="password"
@@ -42,7 +42,7 @@
           autocomplete="new-password"
         />
 
-        <label for="" class="text-white ms-3">Full Name</label>
+        <label for="" class="text-white ms-3">ชื่อจริง-นามสกุล</label>
         <input
           v-model="full_name"
           placeholder="Full Name"
@@ -50,7 +50,7 @@
           autocomplete="name"
         />
 
-        <label for="" class="text-white ms-3">Phone Number</label>
+        <label for="" class="text-white ms-3">เบอร์โทร</label>
         <input
           v-model="phone_number"
           placeholder="Phone Number"
@@ -58,7 +58,7 @@
           autocomplete="tel"
         />
 
-        <label for="" class="text-white ms-3">Profile Image</label>
+        <label for="" class="text-white ms-3">รูปภาพโปรไฟล์</label>
         <input
           @change="handleImageUpload"
           type="file"
@@ -70,7 +70,7 @@
         @click="handleRegister"
         class="bg-pink-600 hover:bg-pink-500 text-white font-semibold py-2 w-full rounded-lg transition duration-200 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:border-white mt-4"
       >
-        Register
+          ลงทะเบียน
       </button>
 
       <p v-if="errorMsg" class="text-red-400 text-sm mt-4 text-center">
@@ -78,8 +78,8 @@
       </p>
 
       <div class="text-center text-sm text-gray-400 mt-4">
-        Already have an account?
-        <router-link to="/login" class="text-white underline hover:text-sky-500">Log In here</router-link>
+        มีบัญชีอยู่เเล้ว?
+        <router-link to="/login" class="text-white underline hover:text-sky-500">เข้าสู่ระบบ</router-link>
       </div>
       </div>
     </div>  

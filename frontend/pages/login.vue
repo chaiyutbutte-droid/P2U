@@ -2,13 +2,13 @@
   <div class="  flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 to-black  " style="background-image: url(https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcXM4aThhcW5nZGgzcXR2YndpZzI5ZDY3YjM5ajl5em54NmU4cmFvZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BNHJXlxFLOTnfyELk7/giphy.gif);  background-size: 100% 140%; height: 100px ; ">
     <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl w-full max-w-sm   border-white">
         <!-- โลโก้และข้อมูลการเข้าสู่ระบบ -->
-      <h1 class="text-2xl font-bold text-white text-center font-serif">Welcome to</h1>
+      <h1 class="text-2xl font-bold text-white text-center font-serif">ยินดีต้อนรับ</h1>
       <h1 class="text-2xl font-bold text-pink-500 text-center font-serif">P2UKaiser</h1>
-      <p class="text-sm text-gray-400 text-center mb-6 mt-2">Log in to your account</p>
+      <p class="text-sm text-gray-400 text-center mb-6 mt-2">เข้าสู่ระบบบัญชีของคุณ</p>
 
       <!-- ฟอร์มการเข้าสู่ระบบ -->
       <div class="flex flex-col">
-        <label for="" class="text-white ms-3">Username</label>
+        <label for="" class="text-white ms-3">ชื่อผู้ใช้</label>
         <div class="relative">
           <input
             v-model="username"
@@ -20,7 +20,7 @@
           <i class="bx bxs-user absolute right-3 top-1/2 transform -translate-y-1/2"></i>
         </div>
 
-        <label for="" class="text-white ms-3">Password</label>
+        <label for="" class="text-white ms-3">รหัสผ่าน</label>
         <div class="relative">
           <input
             v-model="password"
@@ -41,7 +41,7 @@
         :disabled="loading"
       >
         <span class="absolute inset-0 rounded-full bg-white scale-0 group-hover:scale-110 transition-transform duration-100 origin-center"></span>
-        <span class="text-white relative group-hover:text-black transition duration-500">Log In</span>
+        <span class="text-white relative group-hover:text-black transition duration-500">เข้าสู่ระบบ</span>
       </button>
 
       <p v-if="errorMsg" class="text-red-400 text-sm mt-4 text-center">
@@ -50,8 +50,8 @@
 
       <!-- ลิงก์สำหรับ Register -->
       <div class="text-center text-sm text-gray-400 mt-4">
-        Don’t have an account?
-        <router-link to="/register" class="text-white underline hover:text-sky-500">Register here</router-link>
+        ไม่มีบัญชี?
+        <router-link to="/register" class="text-white underline hover:text-sky-500">ลงทะเบียน</router-link>
       </div>
     </div>
   </div>
