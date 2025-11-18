@@ -1,4 +1,8 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
-  "extends": "./.nuxt/tsconfig.json"
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    // IDE is stricter than Nuxt's generated value ("preserve"); align with valid TS option.
+    "module": "esnext"
+  }
 }

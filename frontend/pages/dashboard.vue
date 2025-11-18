@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen bg-gray-900 text-white relative">
+  <div class="layout-full flex min-h-screen bg-gray-900 text-white relative">
     <div v-if="showCartIcon" class="fixed bottom-6 right-6 z-50">
       <button @click="goToProfile" class="relative group">
         
@@ -82,9 +82,9 @@
 
         <!-- หมวดหมู่ -->
         <Carta />
-        <center>
-          <h2 class="text-xl font-bold mb-4  mt-10 mb-5">🛒 สินค้า</h2>
-        </center>
+        <div class="text-center">
+          <h2 class="text-xl font-bold mt-10 mb-5">🛒 สินค้า</h2>
+        </div>
         <!-- Product Grid -->
         <div v-if="allProducts.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div v-for="product in allProducts" :key="product.id"
@@ -230,7 +230,7 @@ import Banner1 from "~/components/banner1.vue";
 // State
 // -----------------------------
 const activeTab = ref("products");
-const defaultImage = "/default-item.jpg";
+const defaultImage = "/default-product.svg";
 const allProducts = ref([]);
 const selectedProduct = ref(null);
 const showCartIcon = ref(true);

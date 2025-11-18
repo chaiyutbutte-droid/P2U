@@ -241,6 +241,9 @@ def register_seller():
     if not all([shop_name, full_name, address_line, district, province, postal_code]):
         return jsonify({"msg": "Required seller information is missing"}), 400
 
+    if not phone_number and not address_phone:
+        return jsonify({"msg": "Phone number is required for seller registration"}), 400
+
     new_address = Address(
         name=address_name or full_name,
         phone=address_phone or phone_number,
@@ -255,11 +258,14 @@ def register_seller():
         user.is_seller = True
         user.shop_name = shop_name
         user.full_name = full_name
-        user.phone_number = phone_number
+        user.phone_number = phone_number or address_phone
+        user.addresses = user.addresses or []
         user.addresses.append(new_address)
         user.save()
         
         return jsonify({"msg": "Seller registration successful"}), 200
+    except ValidationError as e:
+        return jsonify({"msg": f"Invalid seller information: {str(e)}"}), 400
     except Exception as e:
         return jsonify({"msg": f"An error occurred: {str(e)}"}), 500
 

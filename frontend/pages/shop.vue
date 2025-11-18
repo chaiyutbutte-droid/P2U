@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-900 text-white">
+  <div class="layout-full min-h-screen bg-gray-900 text-white">
     <!-- Cart Floating Button -->
     <div v-if="showCartIcon" class="fixed bottom-6 right-6 z-50">
       <button @click="goToCart" class="relative group">
         <div
-          class="relative w-16 h-16 bg-gradient-to-br from-black to-pink-950 rounded-full flex items-center justify-center shadow-lg shadow-pink-950 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-pink-950 border-2 border-white/20">
+          class="relative w-16 h-16 bg-linear-to-br from-black to-pink-950 rounded-full flex items-center justify-center shadow-lg shadow-pink-950 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-pink-950 border-2 border-white/20">
           <!-- Cart Icon -->
           <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
             <path fill="currentColor" d="M7 22q-.825 0-1.412-.587T5 20t.588-1.412T7 18t1.413.588T9 20t-.587 1.413T7 22m10 0q-.825 0-1.412-.587T15 20t.588-1.412T17 18t1.413.588T19 20t-.587 1.413T17 22M6.15 6l2.4 5h7l2.75-5zM5.2 4h14.75q.575 0 .875.513t.025 1.037l-3.55 6.4q-.275.5-.737.775T15.55 13H8.1L7 15h12v2H7q-1.125 0-1.7-.987t-.05-1.963L6.6 11.6L3 4H1V2h3.25z" />
@@ -12,7 +12,7 @@
           
           <!-- Cart Badge -->
           <span v-if="cart.length"
-            class="absolute -top-1 -right-1 bg-gradient-to-r from-pink-500 to-red-500 text-white text-xs font-bold min-w-[22px] h-[22px] flex items-center justify-center rounded-full px-1.5 shadow-lg shadow-pink-500/50 border-2 border-white animate-pulse">
+            class="absolute -top-1 -right-1 bg-linear-to-r from-pink-500 to-red-500 text-white text-xs font-bold min-w-[22px] h-[22px] flex items-center justify-center rounded-full px-1.5 shadow-lg shadow-pink-500/50 border-2 border-white animate-pulse">
             {{ cart.reduce((sum, item) => sum + item.quantity, 0) }}
           </span>
         </div>
@@ -30,7 +30,7 @@
     <main class="container mx-auto px-4 py-8">
       <!-- Header -->
       <div class="text-center mb-12">
-        <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">
+        <h1 class="text-5xl font-bold mb-4 bg-linear-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">
           🛍️ สินค้าทั้งหมด
         </h1>
         <p class="text-gray-400 text-lg">เลือกซื้อสินค้าคุณภาพจากร้านค้าชั้นนำ</p>
@@ -78,7 +78,7 @@
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               @error="product.image_url = defaultImage"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
 
           <!-- Product Info -->
@@ -167,7 +167,7 @@
             <!-- Seller Info -->
             <div class="bg-gray-800 rounded-xl p-4 mb-6">
               <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                <div class="w-12 h-12 bg-linear-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                   {{ selectedProduct.seller.username.charAt(0).toUpperCase() }}
                 </div>
                 <div>
@@ -181,7 +181,7 @@
           <!-- Action Buttons -->
           <div class="flex gap-4">
             <button 
-              class="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30"
+              class="flex-1 bg-linear-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30"
               @click="addToCart(selectedProduct)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M7 22q-.825 0-1.412-.587T5 20t.588-1.412T7 18t1.413.588T9 20t-.587 1.413T7 22m10 0q-.825 0-1.412-.587T15 20t.588-1.412T17 18t1.413.588T19 20t-.587 1.413T17 22M6.15 6l2.4 5h7l2.75-5zM5.2 4h14.75q.575 0 .875.513t.025 1.037l-3.55 6.4q-.275.5-.737.775T15.55 13H8.1L7 15h12v2H7q-1.125 0-1.7-.987t-.05-1.963L6.6 11.6L3 4H1V2h3.25z"/>
@@ -190,7 +190,7 @@
             </button>
             <NuxtLink 
               to="/payment"
-              class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-green-500/30">
+              class="flex-1 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 shadow-lg shadow-green-500/30">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
               </svg>
@@ -208,7 +208,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import axios from 'axios'
 
 // State
-const defaultImage = '/default-item.jpg'
+const defaultImage = '/default-product.svg'
 const allProducts = ref([])
 const selectedProduct = ref(null)
 const showCartIcon = ref(true)
@@ -303,6 +303,7 @@ onMounted(() => {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
   overflow: hidden;
 }
 </style>

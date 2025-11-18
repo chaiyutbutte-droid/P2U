@@ -1,95 +1,137 @@
 <template>
-  <div class="flex justify-between bg-gradient-to-br from-gray-900 to-black ">
-    <div class=" flex justify-center item-center min-h-screen  ml-50 w-1/2 backdrop-blur-sm p-8 shadow-xl max-w-sm">
-      <div class="text-center w-full">
-      <h1 class="text-2xl font-bold text-white  font-serif">ยินดีต้อนรับ</h1>
-      <h1 class="text-2xl font-bold text-pink-500  font-serif">P2UKaiser</h1>
-      <p class="text-sm text-gray-400  mb-6 mt-2">ลงชื่อเข้าใช้บัญชีของคุณ</p>
+  <section class="layout-full relative min-h-screen bg-slate-950 text-white py-12 overflow-hidden">
+    <div class="absolute inset-0 bg-linear-to-br from-gray-950 via-slate-950 to-black"></div>
+    <div class="absolute inset-0 pointer-events-none opacity-60">
+      <div class="absolute -left-24 top-10 w-[520px] h-[520px] bg-pink-600/20 blur-3xl rounded-full"></div>
+      <div class="absolute right-0 -bottom-20 w-[480px] h-[480px] bg-indigo-500/15 blur-3xl rounded-full"></div>
+    </div>
 
-      <div class="flex flex-col text-left gap-1">
-        <label for="" class="text-white ms-3">ชื่อผู้ใช้</label>
-        <input
-          v-model="username"
-          placeholder="Username"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
-          autocomplete="username"
-        />
+    <div class="relative z-10 w-full max-w-6xl mx-auto px-4">
+      <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] items-stretch">
+        <article
+          class="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl p-10 flex flex-col gap-10 shadow-[0_35px_90px_rgba(15,23,42,0.65)]">
+          <div class="space-y-6">
+            <p class="eyebrow text-pink-200">P2U KAISER</p>
+            <h1 class="text-4xl lg:text-5xl font-bold leading-tight text-glow">
+              ยินดีต้อนรับสู่คอมมูนิตี้นักสะสมยุคใหม่
+            </h1>
+            <p class="text-gray-100 text-lg">
+              ซื้อขายของสะสมและสินค้า preloved ด้วยระบบความปลอดภัยที่ไว้ใจได้ พร้อมบริการช่วยเหลือผู้ขายและผู้ซื้อครบวงจร
+            </p>
+          </div>
 
-        <label for="" class="text-white ms-3">อีเมล</label>
-        <input
-          v-model="email"
-          type="email"
-          placeholder="Email"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
-          autocomplete="email"
-        />
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 text-gray-100">
+              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xl">✨</span>
+              <p>รับเหรียญ P2U Coin และสิทธิพิเศษจากกิจกรรมประจำเดือน</p>
+            </div>
+            <div class="flex items-center gap-3 text-gray-100">
+              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xl">🛡️</span>
+              <p>ระบบยืนยันผู้ใช้และร้านค้าเพื่อเพิ่มความน่าเชื่อถือ</p>
+            </div>
+            <div class="flex items-center gap-3 text-gray-100">
+              <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xl">🚀</span>
+              <p>เพิ่มยอดขายได้ไวขึ้นด้วยหน้า Shop และแคมเปญโปรโมต</p>
+            </div>
+          </div>
 
-        <label for="" class="text-white ms-3">รหัสผ่าน</label>
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Password"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:border-4 focus:outline-none focus:border-pink-600"
-          autocomplete="new-password"
-        />
+          <div class="grid gap-6 sm:grid-cols-3 text-center">
+            <div>
+              <p class="text-3xl font-bold">+12K</p>
+              <p class="text-sm text-gray-300 mt-1">ผู้ใช้เชื่อใจ</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold">24/7</p>
+              <p class="text-sm text-gray-300 mt-1">เจ้าหน้าที่ดูแล</p>
+            </div>
+            <div>
+              <p class="text-3xl font-bold">฿8.5M</p>
+              <p class="text-sm text-gray-300 mt-1">มูลค่าสินค้าหมุนเวียน</p>
+            </div>
+          </div>
+        </article>
 
-        <label for="" class="text-white ms-3">ยืนยันรหัสผ่าน</label>
-        <input
-          v-model="confirmPassword"
-          type="password"
-          placeholder="Confirm Password"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:border-4 focus:outline-none focus:border-pink-600"
-          autocomplete="new-password"
-        />
+        <div
+          class="rounded-3xl border border-white/10 bg-slate-950/80 backdrop-blur-2xl p-8 sm:p-10 shadow-[0_25px_70px_rgba(2,6,23,0.75)] space-y-6">
+          <div class="space-y-2 text-center">
+            <p class="text-sm uppercase tracking-[0.45em] text-pink-300">สร้างบัญชีใหม่</p>
+            <h2 class="text-3xl font-semibold">เข้าร่วม P2U Kaiser</h2>
+            <p class="text-gray-400 text-sm">
+              กรอกข้อมูลให้ครบถ้วนเพื่อเริ่มขายและซื้อสินค้าที่คุณรัก
+            </p>
+          </div>
 
-        <label for="" class="text-white ms-3">ชื่อจริง-นามสกุล</label>
-        <input
-          v-model="full_name"
-          placeholder="Full Name"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
-          autocomplete="name"
-        />
+          <form class="space-y-5" @submit.prevent="handleRegister">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="text-sm text-gray-300">ชื่อผู้ใช้</label>
+                <input v-model="username" class="input-style" placeholder="username"
+                  autocomplete="username" />
+              </div>
+              <div>
+                <label class="text-sm text-gray-300">อีเมล</label>
+                <input v-model="email" type="email" class="input-style" placeholder="your@email.com"
+                  autocomplete="email" />
+              </div>
+            </div>
 
-        <label for="" class="text-white ms-3">เบอร์โทร</label>
-        <input
-          v-model="phone_number"
-          placeholder="Phone Number"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
-          autocomplete="tel"
-        />
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="text-sm text-gray-300">รหัสผ่าน</label>
+                <input v-model="password" type="password" class="input-style" placeholder="••••••••"
+                  autocomplete="new-password" />
+              </div>
+              <div>
+                <label class="text-sm text-gray-300">ยืนยันรหัสผ่าน</label>
+                <input v-model="confirmPassword" type="password" class="input-style" placeholder="••••••••"
+                  autocomplete="new-password" />
+              </div>
+            </div>
 
-        <label for="" class="text-white ms-3">รูปภาพโปรไฟล์</label>
-        <input
-          @change="handleImageUpload"
-          type="file"
-          class="input-style bg-white p-3 rounded-lg border-2 border-gray-400 focus:outline-none focus:border-4 focus:border-pink-600"
-        />
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label class="text-sm text-gray-300">ชื่อ - นามสกุล</label>
+                <input v-model="full_name" class="input-style" placeholder="ชื่อ-นามสกุล" autocomplete="name" />
+              </div>
+              <div>
+                <label class="text-sm text-gray-300">เบอร์โทรศัพท์</label>
+                <input v-model="phone_number" class="input-style" placeholder="08X-XXX-XXXX" autocomplete="tel" />
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm text-gray-300">รูปภาพโปรไฟล์</label>
+              <label
+                class="mt-2 flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-gray-300 cursor-pointer hover:border-pink-400 transition">
+                <span>{{ profile_image?.name || 'อัปโหลดไฟล์ .png หรือ .jpg' }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="currentColor"
+                    d="M12 16q.425 0 .713-.288T13 15v-3h3q.425 0 .713-.288T17 11t-.288-.712T16 10h-3V7q0-.425-.288-.712T12 6t-.712.288T11 7v3H8q-.425 0-.712.288T7 11t.288.712T8 12h3v3q0 .425.288.713T12 16m0 6q-2.075 0-3.9-.788t-3.2-2.137t-2.138-3.2T2 12t.762-3.875t2.138-3.2T8.1 2.788T12 2t3.9.788t3.2 2.137t2.137 3.2T22 12q0 2.05-.762 3.875t-2.138 3.2t-3.2 2.137T12 22" />
+                </svg>
+                <input type="file" class="sr-only" @change="handleImageUpload" />
+              </label>
+            </div>
+
+            <button type="submit"
+              class="w-full rounded-2xl bg-pink-600/90 hover:bg-pink-500 text-white font-semibold py-3 transition shadow-lg shadow-pink-500/25 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:ring-offset-2 focus:ring-offset-slate-950">
+              ลงทะเบียน
+            </button>
+          </form>
+
+          <p v-if="errorMsg" class="text-center text-sm text-red-300">
+            {{ errorMsg }}
+          </p>
+
+          <p class="text-center text-sm text-gray-400">
+            มีบัญชีอยู่แล้ว?
+            <NuxtLink to="/login" class="text-pink-300 font-semibold hover:text-white transition">
+              เข้าสู่ระบบ
+            </NuxtLink>
+          </p>
+        </div>
       </div>
-
-      <button
-        @click="handleRegister"
-        class="bg-pink-600 hover:bg-pink-500 text-white font-semibold py-2 w-full rounded-lg transition duration-200 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:border-white mt-4"
-      >
-          ลงทะเบียน
-      </button>
-
-      <p v-if="errorMsg" class="text-red-400 text-sm mt-4 text-center">
-        {{ errorMsg }}
-      </p>
-
-      <div class="text-center text-sm text-gray-400 mt-4">
-        มีบัญชีอยู่เเล้ว?
-        <router-link to="/login" class="text-white underline hover:text-sky-500">เข้าสู่ระบบ</router-link>
-      </div>
-      </div>
-    </div>  
-<div class =" bg-pink-900  w-1/2  pt-60  p-50  min-h-screen">
-<div class =" flex flex-col   gap-6 pt-10 ">
-<span class = "text-6xl font-bold text-white">Welcome!</span>
-<span class = "  text-1xl  text-gray-300">We’re thrilled you’ve chosen to be a part of our community. Ready to get started?</span>
-  </div>
-</div>
-  </div>
+    </div>
+  </section>
 </template>
 
 
@@ -154,6 +196,8 @@ const handleRegister = async () => {
 
 <style scoped lang="postcss">
 .input-style {
-  @apply mb-3 p-3 w-full rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-white;
+  @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-400
+    focus:outline-none focus:ring-2 focus:ring-pink-400/80 focus:border-transparent transition
+    backdrop-blur-md;
 }
 </style>

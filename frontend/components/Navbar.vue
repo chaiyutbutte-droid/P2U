@@ -103,10 +103,15 @@ const profileImageUrl = computed(() => {
   if (!user.value || !user.value.profile_image_url) {
     return "/guest-profile.png";
   }
-  if (user.value.profile_image_url.startsWith("http")) {
-    return user.value.profile_image_url;
+
+  const imagePath = user.value.profile_image_url;
+  if (/^https?:\/\//i.test(imagePath)) {
+    return imagePath;
   }
-  return baseUrl + user.value.profile_image_url;
+
+  const normalizedBase = baseUrl.replace(/\/$/, "");
+  const normalizedPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  return `${normalizedBase}${normalizedPath}`;
 });
 
 const toggleSettings = () => {

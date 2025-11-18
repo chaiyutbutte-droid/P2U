@@ -113,7 +113,7 @@ const fetchProducts = async () => {
     });
     products.value = res.data.map(p => ({
       ...p,
-      image_url: p.image_url ? `${baseURL}${p.image_url}` : '/default-product.png'
+      image_url: p.image_url ? `${baseURL}${p.image_url}` : '/default-product.svg'
     }));
   } catch (err) {
     console.error('Failed to fetch seller products:', err);
