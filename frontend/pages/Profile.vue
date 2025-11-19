@@ -258,7 +258,7 @@
 
 <script setup>
 definePageMeta({ middleware: 'auth' })
-import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import sidebar from '~/components/sidebar.vue'
