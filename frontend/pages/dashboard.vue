@@ -334,24 +334,31 @@ if (process.client) {
 // -----------------------------
 // Fetch products จาก API
 // -----------------------------
+const normalizeImage = (src) => {
+  if (!src) return defaultImage
+  if (/^https?:\/\//i.test(src)) return src
+  const base = "http://localhost:5000"
+  const normalizedBase = base.replace(/\/$/, "")
+  const normalizedPath = src.startsWith("/") ? src : `/${src}`
+  return `${normalizedBase}${normalizedPath}`
+}
+
 const fetchProducts = async () => {
   try {
-    const res = await axios.get("http://localhost:5000/api/products");
+    const res = await axios.get("http://localhost:5000/api/products")
     allProducts.value = (res.data || []).map((p) => ({
       id: p.id || p._id,
       name: p.name,
       description: p.description,
       price: parseFloat(p.price),
-      image_url: p.image_url
-        ? `http://localhost:5000${p.image_url}`
-        : defaultImage,
+      image_url: normalizeImage(p.image_url),
       seller: p.seller || { username: "Unknown", shop_name: "" },
-    }));
+    }))
   } catch (err) {
-    console.error("Failed to fetch products:", err);
-    allProducts.value = [];
+    console.error("Failed to fetch products:", err)
+    allProducts.value = []
   }
-};
+}
 
 // -----------------------------
 // Modal control

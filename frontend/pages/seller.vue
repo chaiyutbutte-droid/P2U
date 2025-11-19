@@ -101,6 +101,14 @@ const fetchSellerProfile = async () => {
   }
 };
 
+const normalizeImage = (src) => {
+  if (!src) return '/default-product.svg'
+  if (/^https?:\/\//i.test(src)) return src
+  const normalizedBase = baseURL.replace(/\/$/, '')
+  const normalizedPath = src.startsWith('/') ? src : `/${src}`
+  return `${normalizedBase}${normalizedPath}`
+}
+
 const fetchProducts = async () => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -113,7 +121,7 @@ const fetchProducts = async () => {
     });
     products.value = res.data.map(p => ({
       ...p,
-      image_url: p.image_url ? `${baseURL}${p.image_url}` : '/default-product.svg'
+      image_url: normalizeImage(p.image_url)
     }));
   } catch (err) {
     console.error('Failed to fetch seller products:', err);

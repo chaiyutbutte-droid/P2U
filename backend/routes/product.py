@@ -5,6 +5,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 from mongoengine.errors import DoesNotExist, ValidationError
+from mongoengine.queryset.visitor import Q
+from flask_cors import cross_origin
 
 from models import User, Product
 
@@ -84,8 +86,23 @@ def create_product():
 # ดึงสินค้าทั้งหมด
 # -----------------------------
 @product.route('/products', methods=['GET'])
+@cross_origin(origins=["http://localhost:3000"])
 def get_all_products():
-    products = Product.objects.order_by('-created_at')
+    search_term = request.args.get('search', '').strip()
+    limit = request.args.get('limit', type=int)
+
+    query = Product.objects.order_by('-created_at')
+    if search_term:
+        query = query.filter(
+            Q(name__icontains=search_term) |
+            Q(description__icontains=search_term) |
+            Q(seller__shop_name__icontains=search_term)
+        )
+
+    if limit:
+        query = query.limit(limit)
+
+    products = query
     product_list = []
 
     for p in products:

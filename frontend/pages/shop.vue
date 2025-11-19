@@ -109,9 +109,25 @@
       </div>
 
       <!-- No Products Found -->
-      <div v-else class="text-center py-20">
-        <div class="text-6xl mb-4">🔍</div>
-        <p class="text-gray-400 text-xl">ไม่พบสินค้าที่ค้นหา</p>
+      <div v-else class="text-center py-20 space-y-4">
+        <div class="text-6xl mb-2">🔍</div>
+        <template v-if="searchQuery">
+          <p class="text-lg text-white font-semibold">ไม่พบผลลัพธ์สำหรับ “{{ searchQuery }}”</p>
+          <p class="text-sm text-gray-400">ลองใช้คำค้นหายอดนิยมเหล่านี้แทน</p>
+          <div class="flex flex-wrap gap-3 justify-center mt-4">
+            <button
+              v-for="term in bubbleSuggestions"
+              :key="term"
+              class="px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-sm text-gray-200 hover:border-pink-500 hover:text-white transition"
+              @click="applyQuickSearch(term)"
+            >
+              {{ term }}
+            </button>
+          </div>
+        </template>
+        <template v-else>
+          <p class="text-gray-400 text-xl">ไม่พบสินค้าที่ค้นหา</p>
+        </template>
       </div>
     </main>
 
@@ -204,7 +220,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
 // State
@@ -214,6 +231,14 @@ const selectedProduct = ref(null)
 const showCartIcon = ref(true)
 const searchQuery = ref('')
 const sortBy = ref('default')
+const route = useRoute()
+const router = useRouter()
+const trendingQueries = ref([])
+const SEARCH_HISTORY_KEY = 'p2u-search-history'
+const bubbleSuggestions = computed(() => {
+  if (trendingQueries.value.length) return trendingQueries.value
+  return ['เสื้อผ้าแฟชั่น', 'รองเท้ากีฬา', 'อุปกรณ์เกมมิ่ง', 'ของแต่งบ้าน', 'เครื่องสำอาง']
+})
 
 // Cart - Client only
 const cart = ref([])
@@ -225,20 +250,32 @@ if (process.client) {
 }
 
 // Fetch products from API
-const fetchProducts = async () => {
+const fetchProducts = async (searchTerm = '') => {
   try {
-    const res = await axios.get('http://localhost:5000/api/products')
+    const params = {}
+    if (searchTerm) params.search = searchTerm
+    const res = await axios.get('http://localhost:5000/api/products', { params })
     allProducts.value = (res.data || []).map(p => ({
       id: p.id || p._id,
       name: p.name,
       description: p.description,
       price: parseFloat(p.price),
-      image_url: p.image_url ? `http://localhost:5000${p.image_url}` : defaultImage,
+      image_url: p.image_url ? (p.image_url.startsWith('http') ? p.image_url : `http://localhost:5000${p.image_url}`) : defaultImage,
       seller: p.seller || { username: 'Unknown', shop_name: '' }
     }))
   } catch (err) {
     console.error('Failed to fetch products:', err)
     allProducts.value = []
+  }
+}
+
+const loadTrendingQueries = () => {
+  if (typeof window === 'undefined') return
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(SEARCH_HISTORY_KEY) || '[]')
+    trendingQueries.value = Array.isArray(stored) ? stored.slice(0, 6) : []
+  } catch {
+    trendingQueries.value = []
   }
 }
 
@@ -316,9 +353,61 @@ const goToCart = () => {
   navigateTo('/cart') // หรือแสดง cart modal
 }
 
+const updateRouteSearch = (term) => {
+  const nextQuery = { ...route.query }
+  if (term) {
+    nextQuery.search = term
+  } else {
+    delete nextQuery.search
+  }
+  router.replace({ query: nextQuery })
+}
+
+const applySearchFromRoute = () => {
+  const term = typeof route.query.search === 'string' ? route.query.search : ''
+  searchQuery.value = term
+  fetchProducts(term)
+  loadTrendingQueries()
+}
+
+const handleGlobalSearch = (event) => {
+  const term = typeof event.detail === 'string' ? event.detail : ''
+  searchQuery.value = term
+  updateRouteSearch(term)
+  loadTrendingQueries()
+}
+
+const applyQuickSearch = (term) => {
+  if (!term) return
+  searchQuery.value = term
+  updateRouteSearch(term)
+}
+
+watch(
+  () => route.query.search,
+  (newVal, oldVal) => {
+    if (newVal === oldVal) return
+    if (typeof newVal === 'string') {
+      searchQuery.value = newVal
+      fetchProducts(newVal)
+      loadTrendingQueries()
+    } else if (!newVal) {
+      searchQuery.value = ''
+      fetchProducts('')
+      loadTrendingQueries()
+    }
+  }
+)
+
 // Lifecycle
 onMounted(() => {
-  fetchProducts()
+  applySearchFromRoute()
+  loadTrendingQueries()
+  window.addEventListener('search-products', handleGlobalSearch)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('search-products', handleGlobalSearch)
 })
 </script>
 

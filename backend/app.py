@@ -27,9 +27,16 @@ def create_app():
     # ✅ อนุญาต CORS สำหรับทุก API route / origin และ preflight requests
     CORS(
         app,
-        resources={r"/api/*": {"origins": ["http://localhost:3000"]}},
+        resources={r"/api/*": {
+            "origins": [
+                "http://localhost:3000",
+                "http://127.0.0.1:3000"
+            ]
+        }},
         supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        expose_headers=["Content-Type", "Authorization"]
     )
     JWTManager(app)
 

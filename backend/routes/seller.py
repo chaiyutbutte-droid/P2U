@@ -28,6 +28,28 @@ def save_image(image_file):
         return f"/uploads/products/{unique_filename}"
     return None
 
+# 🔸 Seller profile
+@seller.route('/seller/profile', methods=['GET', 'OPTIONS'])
+@jwt_required(optional=True)
+def get_seller_profile():
+    if request.method == 'OPTIONS':
+        return '', 204
+    user_id = get_jwt_identity()
+    if not user_id:
+        return jsonify({"msg": "Unauthorized"}), 401
+    user = User.objects(id=ObjectId(user_id)).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+    return jsonify({
+        "id": str(user.id),
+        "username": user.username,
+        "is_seller": user.is_seller,
+        "shop_name": user.shop_name,
+        "full_name": user.full_name,
+        "email": user.email,
+        "phone_number": user.phone_number
+    }), 200
+
 # 🔸 Get all products for the current seller
 @seller.route('/seller/products', methods=['GET'])
 @jwt_required()

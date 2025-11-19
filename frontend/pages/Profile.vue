@@ -73,7 +73,7 @@
               class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
               Go to Seller Page
             </button>
-            <button v-else @click="router.push('/Registerseller')"
+            <button v-else @click="router.push('/register-seller')"
               class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
               Register as Seller
             </button>
