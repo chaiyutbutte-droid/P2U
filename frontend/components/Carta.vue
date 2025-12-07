@@ -6,7 +6,8 @@
       <div
         v-for="(item, index) in categories"
         :key="index"
-        class="item bg-gray-800 hover:bg-gray-700  border-2 p-4 rounded-xl shadow-lg text-center relative"
+        class="item bg-gray-800 hover:bg-gray-700  border-2 p-4 rounded-xl shadow-lg text-center relative cursor-pointer"
+        @click="goToCategory(item)"
       >
         <!-- แสดงภาพจาก URL หรือข้อความ "ไม่มีภาพ" -->
         <img
@@ -73,6 +74,18 @@ export default {
         }
       ]
     };
+  },
+  methods: {
+    goToCategory(item) {
+      this.$router.push({
+        path: '/manuall',
+        query: { 
+          id: item.id, 
+          name: item.name,
+          image: item.image
+        }
+      });
+    }
   }
 };
 </script>
