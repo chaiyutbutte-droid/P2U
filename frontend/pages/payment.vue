@@ -76,12 +76,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const route = useRoute();
 
-const baseURL = "http://localhost:5000";
+// ✅ URL ต้องมี /api เพื่อให้ตรงกับโครงสร้าง Backend
+const baseURL = "http://localhost:5000/api"; 
 const defaultImage = "/no-image.png";
 
 const cartItems = ref([]);
@@ -92,7 +92,7 @@ const termsAccepted = ref(false);
 const getImageUrl = (path) => {
   if (!path) return defaultImage;
   if (path.startsWith("http")) return path;
-  return `${baseURL}/${path.replace(/^\/+/, "")}`;
+  return `http://localhost:5000/${path.replace(/^\/+/, "")}`;
 };
 
 const onImgError = (event) => {
@@ -100,20 +100,18 @@ const onImgError = (event) => {
 };
 
 onMounted(() => {
-  // ✅ โหลดเฉพาะสินค้าที่เลือกมาชำระเงิน (checkout_items)
   const storedCheckout = localStorage.getItem("checkout_items");
   if (storedCheckout) {
     try {
       cartItems.value = JSON.parse(storedCheckout);
+      console.log("Items for Payment:", cartItems.value);
     } catch {
       cartItems.value = [];
     }
   } else {
-    // ถ้าไม่มีข้อมูล ให้กลับไปหน้าตะกร้า
     router.push("/cart");
   }
 
-  // โหลดชื่อผู้ใช้
   const storedUser = localStorage.getItem("user");
   if (storedUser) {
     try {
@@ -124,14 +122,8 @@ onMounted(() => {
     }
   }
 
-  // โหลดค่าชำระเงิน
-  if (route.query.method) {
-    paymentMethod.value = route.query.method;
-    localStorage.setItem("paymentMethod", route.query.method);
-  } else {
-    const storedMethod = localStorage.getItem("paymentMethod");
-    if (storedMethod) paymentMethod.value = storedMethod;
-  }
+  const storedMethod = localStorage.getItem("paymentMethod");
+  if (storedMethod) paymentMethod.value = storedMethod;
 });
 
 const totalPrice = computed(() =>
@@ -141,22 +133,53 @@ const totalPrice = computed(() =>
   )
 );
 
-const buyNow = () => {
+const buyNow = async () => {
   if (!termsAccepted.value) return;
 
-  alert("ชำระเงินสำเร็จแล้วเพคะ! ✨");
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("กรุณาเข้าสู่ระบบก่อนนะเพคะ ✨");
+      return;
+    }
 
-  // ✅ ลบสินค้าที่จ่ายเงินแล้วออกจากตะกร้าหลัก (Cart)
-  const fullCart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const paidIds = cartItems.value.map(item => item.id);
-  const remainingCart = fullCart.filter(item => !paidIds.includes(item.id));
-  
-  localStorage.setItem("cart", JSON.stringify(remainingCart));
-  
-  // ล้างข้อมูลหน้าชำระเงินทิ้ง
-  localStorage.removeItem("checkout_items");
-  
-  router.push("/payment_success");
+    // ✅ ส่ง ID ที่มีอยู่ในข้อมูล (ดึงทั้งจาก _id และ id)
+    const itemIds = cartItems.value.map(item => item._id || item.id).filter(id => id);
+    
+    console.log("Sending IDs to Backend:", itemIds);
+
+    const response = await fetch(`${baseURL}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        cart_items: itemIds
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("ชำระเงินสำเร็จแล้วเพคะ! ✨");
+
+      // ลบรายการที่ซื้อแล้วออกจากตะกร้าหลัก
+      const fullCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const remainingCart = fullCart.filter(item => !itemIds.includes(item._id || item.id));
+      localStorage.setItem("cart", JSON.stringify(remainingCart));
+
+      // ล้างรายการ checkout
+      localStorage.removeItem("checkout_items");
+
+      router.push("/payment_success");
+    } else {
+      alert(`ขออภัยเพคะ: ${result.msg || 'เกิดข้อผิดพลาด'}`);
+    }
+  } catch (error) {
+    console.error("Error creating order:", error);
+    alert("ไม่สามารถติดต่อเซิร์ฟเวอร์ได้ ตรวจสอบว่าเรียก URL /api/orders ถูกต้องหรือไม่นะเพคะ");
+  }
 };
 </script>
 
