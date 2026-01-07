@@ -22,8 +22,8 @@ class Config:
     MAIL_PORT = 465
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
-    MAIL_USERNAME = 'chanidaphalanon2005@gmail.com'
-    MAIL_PASSWORD = 'time smjt wzja ufnl'  # ใช้ App Password เท่านั้น!
+    MAIL_USERNAME = 'p2ukaiser.official@gmail.com'
+    MAIL_PASSWORD = 'aitr khdo ffkn ngqd'  # ใช้ App Password เท่านั้น!
 
     # -------------------------------
     #  💰 Coin System
