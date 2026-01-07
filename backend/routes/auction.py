@@ -453,6 +453,67 @@ def get_my_auto_bids():
 
 
 # -----------------------------
+# Get Seller's Auctions
+# -----------------------------
+@auction.route('/auctions/my-auctions', methods=['GET'])
+@jwt_required()
+def get_my_auctions():
+    """Get all auctions created by the current seller"""
+    user_id = get_jwt_identity()
+    user = User.objects(id=ObjectId(user_id)).first()
+    
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+    
+    if not user.is_seller:
+        return jsonify({"msg": "เฉพาะผู้ขายเท่านั้น"}), 403
+    
+    now = datetime.utcnow()
+    
+    # Get all auctions by this seller
+    seller_auctions = Auction.objects(seller=user).order_by('-created_at')
+    
+    active = []
+    ended = []
+    
+    for a in seller_auctions:
+        time_left = (a.end_time - now).total_seconds() if a.end_time > now else 0
+        
+        auction_data = {
+            "id": str(a.id),
+            "title": a.title,
+            "description": a.description,
+            "image_url": a.image_url,
+            "category": a.category,
+            "starting_price": float(a.starting_price),
+            "current_price": float(a.current_price),
+            "total_bids": a.total_bids,
+            "time_left": int(time_left),
+            "end_time": a.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "is_ended": a.is_ended,
+            "winner": {
+                "id": str(a.winner.id),
+                "username": a.winner.username
+            } if a.winner else None
+        }
+        
+        if a.is_ended or a.end_time <= now:
+            ended.append(auction_data)
+        else:
+            active.append(auction_data)
+    
+    return jsonify({
+        "active": active,
+        "ended": ended,
+        "stats": {
+            "total": len(seller_auctions),
+            "active": len(active),
+            "ended": len(ended)
+        }
+    }), 200
+
+
+# -----------------------------
 # Auction History
 # -----------------------------
 @auction.route('/auctions/my-history', methods=['GET'])

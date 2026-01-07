@@ -12,8 +12,8 @@
           </h1>
           <p class="text-dark-400 mt-1">ประมูลสินค้าสุดพิเศษ ราคาเริ่มต้นต่ำมาก!</p>
         </div>
-        <NuxtLink v-if="isSeller" to="/auction/create" class="btn-primary">
-          ➕ สร้างการประมูล
+        <NuxtLink to="/auction-history" class="btn-secondary">
+          📜 ประวัติการประมูล
         </NuxtLink>
       </div>
 
@@ -138,6 +138,41 @@
                     {{ isLoading ? '⏳ กำลังประมูล...' : '🔨 ประมูล!' }}
                   </button>
                   
+                  <!-- Auto-Bid Section -->
+                  <div class="mt-4 glass-light rounded-xl p-4">
+                    <div class="flex items-center justify-between mb-3">
+                      <div class="flex items-center gap-2">
+                        <span class="text-lg">🤖</span>
+                        <span class="text-white font-medium">Auto-Bid</span>
+                      </div>
+                      <span v-if="myAutoBid" class="text-green-400 text-xs px-2 py-1 bg-green-500/20 rounded-full">เปิดใช้งาน</span>
+                    </div>
+                    
+                    <!-- Auto-Bid Active Status -->
+                    <div v-if="myAutoBid" class="space-y-2">
+                      <div class="flex justify-between text-sm">
+                        <span class="text-dark-400">ราคาสูงสุด</span>
+                        <span class="text-primary-400 font-bold">฿{{ myAutoBid.max_amount?.toLocaleString() }}</span>
+                      </div>
+                      <div class="flex gap-2">
+                        <button @click="showAutoBidModal = true" class="flex-1 py-2 bg-dark-700 hover:bg-dark-600 rounded-lg text-sm text-white transition">
+                          แก้ไข
+                        </button>
+                        <button @click="cancelAutoBid" class="flex-1 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm transition">
+                          ยกเลิก
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Set Auto-Bid Button -->
+                    <div v-else>
+                      <p class="text-dark-400 text-sm mb-3">ตั้งค่าให้ระบบประมูลอัตโนมัติแทนคุณ</p>
+                      <button @click="showAutoBidModal = true" class="w-full py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg text-sm font-medium transition">
+                        ⚡ ตั้ง Auto-Bid
+                      </button>
+                    </div>
+                  </div>
+                  
                   <!-- Bid History -->
                   <div v-if="bidHistory.length" class="mt-4">
                     <div class="flex justify-between items-center mb-3">
@@ -186,6 +221,56 @@
           </div>
         </Transition>
       </Teleport>
+
+      <!-- Auto-Bid Modal -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div v-if="showAutoBidModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" @click="showAutoBidModal = false">
+            <div class="glass rounded-2xl w-full max-w-md p-6 animate-in" @click.stop>
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                  🤖 ตั้งค่า Auto-Bid
+                </h3>
+                <button @click="showAutoBidModal = false" class="text-dark-400 hover:text-white text-2xl">✕</button>
+              </div>
+              
+              <p class="text-dark-400 text-sm mb-4">
+                ระบบจะประมูลอัตโนมัติแทนคุณจนกว่าจะถึงราคาสูงสุดที่กำหนด
+              </p>
+              
+              <div class="mb-4">
+                <label class="text-dark-300 text-sm mb-2 block">ราคาสูงสุดที่ต้องการ (฿)</label>
+                <input 
+                  v-model.number="autoBidAmount" 
+                  type="number" 
+                  :min="minBid"
+                  class="w-full input-glass text-xl font-bold"
+                  :placeholder="`ขั้นต่ำ ฿${minBid.toLocaleString()}`"
+                />
+              </div>
+              
+              <div class="glass-light rounded-lg p-3 mb-4">
+                <div class="flex justify-between text-sm">
+                  <span class="text-dark-400">ราคาปัจจุบัน</span>
+                  <span class="text-white">฿{{ selectedAuction?.current_price?.toLocaleString() }}</span>
+                </div>
+                <div class="flex justify-between text-sm mt-1">
+                  <span class="text-dark-400">ราคาขั้นต่ำถัดไป</span>
+                  <span class="text-primary-400">฿{{ minBid.toLocaleString() }}</span>
+                </div>
+              </div>
+              
+              <button 
+                @click="setAutoBid" 
+                :disabled="autoBidAmount < minBid || isLoading"
+                class="btn-primary w-full py-3 font-bold disabled:opacity-50"
+              >
+                {{ isLoading ? '⏳ กำลังตั้งค่า...' : '⚡ ยืนยัน Auto-Bid' }}
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </div>
   </div>
 </template>
@@ -201,6 +286,11 @@ const bidAmount = ref(0);
 const bidHistory = ref([]);
 const isLoading = ref(false);
 const isSeller = ref(false);
+
+// Auto-Bid State
+const showAutoBidModal = ref(false);
+const autoBidAmount = ref(0);
+const myAutoBid = ref(null);
 
 const baseUrl = 'http://localhost:5000';
 
@@ -265,6 +355,10 @@ async function openAuction(auction) {
     selectedAuction.value = res.data;
     bidHistory.value = res.data.bid_history || [];
     bidAmount.value = res.data.current_price + res.data.min_bid_increment;
+    autoBidAmount.value = res.data.current_price + res.data.min_bid_increment;
+    
+    // Fetch user's auto-bid status
+    await fetchMyAutoBid(auction.id);
   } catch (err) {
     console.error('Failed to get auction details:', err);
   }
@@ -273,6 +367,7 @@ async function openAuction(auction) {
 function closeAuction() {
   selectedAuction.value = null;
   bidHistory.value = [];
+  myAutoBid.value = null;
 }
 
 async function placeBid() {
@@ -308,6 +403,81 @@ async function placeBid() {
     fetchAuctions();
   } catch (err) {
     alert(err.response?.data?.msg || 'ประมูลไม่สำเร็จ');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Auto-Bid Functions
+async function fetchMyAutoBid(auctionId) {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  
+  try {
+    const res = await axios.get(`${baseUrl}/api/auctions/my-auto-bids`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const autoBids = res.data.auto_bids || [];
+    myAutoBid.value = autoBids.find(ab => ab.auction_id === auctionId) || null;
+  } catch (err) {
+    console.error('Failed to fetch auto-bids:', err);
+  }
+}
+
+async function setAutoBid() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('กรุณาเข้าสู่ระบบก่อน');
+    return;
+  }
+  
+  if (autoBidAmount.value < minBid.value) {
+    alert(`ราคาสูงสุดต้องไม่น้อยกว่า ฿${minBid.value.toLocaleString()}`);
+    return;
+  }
+  
+  isLoading.value = true;
+  try {
+    await axios.post(`${baseUrl}/api/auctions/${selectedAuction.value.id}/auto-bid`, {
+      max_amount: autoBidAmount.value
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    alert('🤖 ตั้งค่า Auto-Bid สำเร็จ!');
+    showAutoBidModal.value = false;
+    
+    // Refresh auction details and auto-bid status
+    await fetchMyAutoBid(selectedAuction.value.id);
+    const detailRes = await axios.get(`${baseUrl}/api/auctions/${selectedAuction.value.id}`);
+    selectedAuction.value.current_price = detailRes.data.current_price;
+    selectedAuction.value.total_bids = detailRes.data.total_bids;
+    bidHistory.value = detailRes.data.bid_history || [];
+    
+    fetchAuctions();
+  } catch (err) {
+    alert(err.response?.data?.msg || 'ตั้งค่า Auto-Bid ไม่สำเร็จ');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function cancelAutoBid() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  
+  if (!confirm('ยกเลิก Auto-Bid สำหรับการประมูลนี้?')) return;
+  
+  isLoading.value = true;
+  try {
+    await axios.delete(`${baseUrl}/api/auctions/${selectedAuction.value.id}/auto-bid`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    alert('ยกเลิก Auto-Bid สำเร็จ');
+    myAutoBid.value = null;
+  } catch (err) {
+    alert(err.response?.data?.msg || 'ยกเลิก Auto-Bid ไม่สำเร็จ');
   } finally {
     isLoading.value = false;
   }

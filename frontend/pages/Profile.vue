@@ -163,6 +163,87 @@
         <div v-else class="text-gray-400 text-sm text-center py-12 bg-gray-800/30 rounded-xl border border-dashed border-gray-700">
            🏰 ตะกร้าว่างเปล่าเพคะ
         </div>
+
+        <!-- My Auctions Section (Sellers Only) -->
+        <div v-if="user?.is_seller" class="mt-8">
+          <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-4">
+            <h2 class="text-xl font-semibold">🔨 การประมูลของฉัน</h2>
+            <button @click="router.push('/auction/create')" class="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold rounded-lg transition">
+              ➕ สร้างการประมูล
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div v-if="loadingAuctions" class="text-center text-gray-400 py-8">
+            กำลังโหลด...
+          </div>
+
+          <!-- Auction Tabs -->
+          <div v-else>
+            <div class="flex gap-2 mb-4">
+              <button 
+                @click="auctionTab = 'active'" 
+                class="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                :class="auctionTab === 'active' ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              >
+                กำลังประมูล ({{ myAuctions.active?.length || 0 }})
+              </button>
+              <button 
+                @click="auctionTab = 'ended'" 
+                class="px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                :class="auctionTab === 'ended' ? 'bg-pink-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              >
+                จบแล้ว ({{ myAuctions.ended?.length || 0 }})
+              </button>
+            </div>
+
+            <!-- Active Auctions -->
+            <div v-if="auctionTab === 'active'" class="space-y-3">
+              <div v-if="myAuctions.active?.length" v-for="auction in myAuctions.active" :key="auction.id"
+                class="bg-gray-800 p-4 rounded-xl flex items-center gap-4 hover:bg-gray-700/50 transition-all cursor-pointer"
+                @click="router.push(`/auction`)"
+              >
+                <img :src="getAuctionImage(auction.image_url)" class="w-16 h-16 object-cover rounded-lg" />
+                <div class="flex-1">
+                  <h4 class="font-semibold text-white truncate">{{ auction.title }}</h4>
+                  <div class="flex items-center gap-4 mt-1 text-sm">
+                    <span class="text-pink-400 font-bold">฿{{ auction.current_price?.toLocaleString() }}</span>
+                    <span class="text-gray-400">{{ auction.total_bids }} ราคา</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-red-400 text-sm">⏱️ {{ formatTimeLeft(auction.time_left) }}</span>
+                </div>
+              </div>
+              <div v-else class="text-center text-gray-400 py-8 bg-gray-800/30 rounded-xl border border-dashed border-gray-700">
+                ยังไม่มีการประมูลที่กำลังดำเนินอยู่
+              </div>
+            </div>
+
+            <!-- Ended Auctions -->
+            <div v-if="auctionTab === 'ended'" class="space-y-3">
+              <div v-if="myAuctions.ended?.length" v-for="auction in myAuctions.ended" :key="auction.id"
+                class="bg-gray-800 p-4 rounded-xl flex items-center gap-4 opacity-70"
+              >
+                <img :src="getAuctionImage(auction.image_url)" class="w-16 h-16 object-cover rounded-lg grayscale" />
+                <div class="flex-1">
+                  <h4 class="font-semibold text-white truncate">{{ auction.title }}</h4>
+                  <div class="flex items-center gap-4 mt-1 text-sm">
+                    <span class="text-green-400 font-bold">฿{{ auction.current_price?.toLocaleString() }}</span>
+                    <span class="text-gray-400">{{ auction.total_bids }} ราคา</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span v-if="auction.winner" class="text-green-400 text-sm">🏆 {{ auction.winner.username }}</span>
+                  <span v-else class="text-gray-500 text-sm">ไม่มีผู้ประมูล</span>
+                </div>
+              </div>
+              <div v-else class="text-center text-gray-400 py-8 bg-gray-800/30 rounded-xl border border-dashed border-gray-700">
+                ยังไม่มีการประมูลที่จบแล้ว
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -223,6 +304,11 @@ const editingIndex = ref(null)
 // ✅ Cart Sync Logic
 const cartItems = ref([])
 
+// ✅ Auction State
+const myAuctions = ref({ active: [], ended: [] })
+const loadingAuctions = ref(false)
+const auctionTab = ref('active')
+
 const loadCart = () => {
   if (process.client) {
     const savedCart = localStorage.getItem("cart")
@@ -251,6 +337,41 @@ const removeItem = (item) => {
   cartItems.value = cartItems.value.filter(i => i.id !== item.id)
 }
 
+// Fetch My Auctions (Sellers Only)
+const fetchMyAuctions = async () => {
+  const token = localStorage.getItem('token')
+  if (!token) return
+  
+  loadingAuctions.value = true
+  try {
+    const res = await axios.get(`${baseURL}/api/auctions/my-auctions`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    myAuctions.value = {
+      active: res.data.active || [],
+      ended: res.data.ended || []
+    }
+  } catch (err) {
+    console.error('Failed to fetch auctions:', err)
+  } finally {
+    loadingAuctions.value = false
+  }
+}
+
+const getAuctionImage = (url) => {
+  if (!url) return '/default-product.png'
+  return url.startsWith('http') ? url : baseURL + url
+}
+
+const formatTimeLeft = (seconds) => {
+  if (!seconds || seconds <= 0) return 'จบแล้ว'
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 24) return `${Math.floor(h / 24)} วัน`
+  if (h > 0) return `${h} ชม. ${m} น.`
+  return `${m} นาที`
+}
+
 // Fetch profile
 onMounted(async () => {
   loadCart()
@@ -262,6 +383,11 @@ onMounted(async () => {
       res.data.profile_image_url = baseURL + res.data.profile_image_url
     }
     user.value = res.data
+    
+    // Fetch auctions if seller
+    if (res.data.is_seller) {
+      fetchMyAuctions()
+    }
   } catch (e) { 
     console.error(e)
     router.push('/login') 
