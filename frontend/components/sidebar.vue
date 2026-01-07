@@ -30,7 +30,7 @@
           <div v-if="expand" class="text-center">
             <p class="text-sm font-semibold text-white truncate w-full">{{ username }}</p>
             <p v-if="coinBalance !== null" class="text-xs text-primary-400 flex items-center justify-center gap-1 mt-1">
-              <span>🪙</span>
+              <span>💰</span>
               <span>{{ coinBalance.toLocaleString() }} Coins</span>
             </p>
           </div>
@@ -121,6 +121,7 @@ const username = computed(() => user.value?.username || "ผู้ใช้ง�
 
 const menuItems = computed(() => [
   { name: "ร้านค้า", icon: "🏠", route: "/dashboard" },
+  { name: "ตระกร้าสินค้า", icon: "🛒", route: "/cart" },
   { name: "ประมูล", icon: "🔨", route: "/auction" },
   { name: "ประวัติประมูล", icon: "📜", route: "/auction-history" },
   { name: "อันดับผู้ขาย", icon: "🏆", route: "/seller-ranking" },
@@ -132,7 +133,7 @@ const menuItems = computed(() => [
   { name: "แจ้งเตือน", icon: "🔔", route: "/notifications" },
   { name: "แชท", icon: "💬", route: "/chat" },
   ...(user.value?.is_seller ? [{ name: "แดชบอร์ดผู้ขาย", icon: "📊", route: "/seller-dashboard" }] : []),
-  { name: "เติมเหรียญ", icon: "🪙", route: "/topup" },
+  { name: "เติมเหรียญ", icon: "💰", route: "/topup" },
 ]);
 
 const isActive = (path) => route.path === path;

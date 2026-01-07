@@ -1,6 +1,5 @@
 <template>
-
-  <div class="p-6 max-w-8xl mx-auto bg-black text-white mt-1 mb-1 mr-1 transition-all duration-300">
+  <div class="p-6 max-w-8xl mx-auto bg-black text-white mt-1 mb-1 mr-1 transition-all duration-300 min-h-screen">
     <div class="md:w-1/4 space-y-5">
       <div class="flex items-center justify-center mb-6 relative">
         <h1 class="text-3xl font-extrabold text-center">
@@ -14,9 +13,7 @@
     </div>
 
     <div v-if="user" class="flex flex-col md:flex-row md:space-x-8 space-y-8 md:space-y-0">
-      <!-- Left Sidebar: Profile + Addresses -->
       <div class="md:w-1/4 space-y-5">
-        <!-- Profile Info -->
         <div class="flex items-center space-x-6">
           <div class="relative w-28 h-28 shrink-0">
             <img :src="user.profile_image_url || defaultProfile" alt="Profile"
@@ -26,7 +23,6 @@
               aria-label="Change profile picture" title="Change profile picture">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
-
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 5h6m2 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h10zM16 3l-1-1m0 0L9 8m7-6v6H9" />
               </svg>
@@ -41,7 +37,6 @@
           </div>
         </div>
 
-        <!-- Seller Status -->
         <div class="flex items-center space-x-2 mt-4">
           <span class="font-semibold text-pink-400">{{ t('seller') }}:</span>
           <span>{{ user.is_seller ? t('registered') : t('notRegistered') }}</span>
@@ -54,14 +49,13 @@
             Register as Seller
           </button>
         </div>
-        <!-- เพิ่มปุ่ม Link ไปหน้า ai.vue ที่นี่ -->
+
         <div class="mt-6">
           <button @click="router.push('/ai')"
             class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">
             ไปยังหน้า AI
           </button>
         </div>
-        <!-- Addresses -->
 
         <div class="w-full mt-8">
           <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">{{ t('addresses') }}</h2>
@@ -69,9 +63,9 @@
             <div v-for="(addr, index) in user.addresses" :key="index"
               class="bg-gray-800 rounded-lg p-4 shadow-inner relative">
               <div class="flex items-center justify-between">
-
-                <h3 class="text-lg font-semibold mb-3 border-b border-gray-700 pb-2">{{ isEditing ? t('editAddress') :
-                  t('addNewAddress') }}</h3>
+                <h3 class="text-lg font-semibold mb-3 border-b border-gray-700 pb-2">
+                  {{ addr.is_default ? 'Default Address' : 'Address ' + (index + 1) }}
+                </h3>
                 <span v-if="addr.is_default"
                   class="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">Default</span>
               </div>
@@ -89,22 +83,24 @@
             </div>
           </div>
 
-          <!-- Add/Edit Address Form -->
           <div class="mt-6 bg-gray-800 rounded-lg p-5 shadow-inner">
             <h3 class="text-lg font-semibold mb-3 border-b border-gray-700 pb-2">
               {{ isEditing ? t('editAddress') : t('addNewAddress') }}
             </h3>
             <form @submit.prevent="addOrUpdateAddress">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input v-model="newAddress.name" :placeholder="t('fullName')" type="text" class="input-field"
-                  required />
-                <input v-model="newAddress.phone" :placeholder="t('phone')" type="text" class="input-field" required />
+                <input v-model="newAddress.name" :placeholder="t('fullName')" type="text"
+                  class="bg-gray-700 text-white p-2 rounded w-full outline-none focus:ring-1 focus:ring-pink-500" required />
+                <input v-model="newAddress.phone" :placeholder="t('phone')" type="text"
+                  class="bg-gray-700 text-white p-2 rounded w-full outline-none focus:ring-1 focus:ring-pink-500" required />
                 <input v-model="newAddress.address_line" placeholder="Address Line" type="text"
-                  class="input-field col-span-2" required />
-                <input v-model="newAddress.district" placeholder="District" type="text" class="input-field" required />
-                <input v-model="newAddress.province" placeholder="Province" type="text" class="input-field" required />
-                <input v-model="newAddress.postal_code" placeholder="Postal Code" type="text" class="input-field"
-                  required />
+                  class="bg-gray-700 text-white p-2 rounded w-full outline-none focus:ring-1 focus:ring-pink-500 col-span-2" required />
+                <input v-model="newAddress.district" placeholder="District" type="text"
+                  class="bg-gray-700 text-white p-2 rounded w-full outline-none focus:ring-1 focus:ring-pink-500" required />
+                <input v-model="newAddress.province" placeholder="Province" type="text"
+                  class="bg-gray-700 text-white p-2 rounded w-full outline-none focus:ring-1 focus:ring-pink-500" required />
+                <input v-model="newAddress.postal_code" placeholder="Postal Code" type="text"
+                  class="bg-gray-700 text-white p-2 rounded w-full outline-none focus:ring-1 focus:ring-pink-500" required />
               </div>
               <div class="flex items-center mt-4">
                 <input v-model="newAddress.is_default" type="checkbox" id="is_default" class="mr-2" />
@@ -121,85 +117,92 @@
         </div>
       </div>
 
-      <!-- Right Content -->
       <div class="md:w-3/4 space-y-6">
-
-        <!-- Track Order -->
         <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">{{ t('trackOrder') }}</h2>
         <div class="bg-gray-800 rounded-lg p-4 shadow-inner min-h-48 flex items-center justify-center text-gray-400">
           <p>Tracking information will appear here.</p>
         </div>
 
+        <div class="flex items-center justify-between border-b border-gray-700 pb-2">
+          <h2 class="text-xl font-semibold">🛒 {{ t('myCart') }}</h2>
+          <span v-if="cartItems.length > 0" class="text-pink-400 text-sm">รวม {{ totalItems }} ชิ้น</span>
+        </div>
 
-        <!-- Cart Items -->
-        <h2 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">🛒 {{ t('myCart') }}</h2>
         <div v-if="cartItems.length > 0" class="space-y-4">
-          <div v-for="(item, index) in cartItems" :key="index"
-            class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-inner">
-            <div class="flex items-center space-x-3">
-              <img :src="formatImageUrl(item.image)" alt="product" class="w-16 h-16 object-cover rounded" />
+          <div v-for="(item, index) in cartItems" :key="item.id"
+            class="bg-gray-800 p-4 rounded-xl flex justify-between items-center shadow-inner hover:bg-gray-700/50 transition-all">
+            <div class="flex items-center space-x-4">
+              <img :src="item.image_url" alt="product" class="w-16 h-16 object-cover rounded-lg" />
               <div>
                 <p class="font-semibold text-white">{{ item.name }}</p>
-                <p class="text-sm text-gray-400">Qty: {{ item.quantity }}</p>
+                <p class="text-xs text-gray-400">ร้าน: {{ item.seller?.shop_name || 'General Store' }}</p>
+                
+                <div class="flex items-center mt-2 bg-black/30 rounded-lg w-fit p-1 border border-white/5">
+                   <button @click="updateQty(item, -1)" class="px-2 text-pink-400 hover:bg-white/10 rounded">-</button>
+                   <span class="px-3 text-xs font-bold">{{ item.quantity }}</span>
+                   <button @click="updateQty(item, 1)" class="px-2 text-pink-400 hover:bg-white/10 rounded">+</button>
+                </div>
               </div>
             </div>
-            <span class="font-semibold text-pink-400">{{ item.price }} ฿</span>
+            <div class="text-right">
+              <p class="font-bold text-pink-400">฿{{ (item.price * item.quantity).toLocaleString() }}</p>
+              <button @click="removeItem(item)" class="text-[10px] text-red-400 hover:underline mt-1">ลบออก</button>
+            </div>
           </div>
-          <button class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg mt-2">Go to Checkout</button>
+          
+          <div class="mt-4 p-4 bg-gray-800 rounded-xl border border-pink-500/20">
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-gray-400 font-medium">ยอดรวมสุทธิ:</span>
+              <span class="text-2xl font-black text-pink-500">฿{{ totalPrice.toLocaleString() }}</span>
+            </div>
+            <button @click="router.push('/cart')" class="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-lg font-bold shadow-lg shadow-pink-600/20 transition-all active:scale-95">
+              ไปที่หน้าตะกร้าสินค้า ✨
+            </button>
+          </div>
         </div>
-        <div v-else class="text-gray-400 text-sm text-center">Your cart is empty</div>
+        <div v-else class="text-gray-400 text-sm text-center py-12 bg-gray-800/30 rounded-xl border border-dashed border-gray-700">
+           🏰 ตะกร้าว่างเปล่าเพคะ
+        </div>
       </div>
     </div>
 
-    <!-- Logout -->
-    <div class="md:w-1/4 space-y-5 mt-4">
+    <div v-if="user" class="md:w-1/4 space-y-5 mt-4">
       <button @click="handleLogout"
         class="mt-8 w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 rounded-lg transition">
         Logout
       </button>
-      <div v-if="!user" class="text-center text-gray-400 mt-10">Loading...</div>
     </div>
+    
+    <div v-if="!user" class="text-center text-gray-400 mt-20 animate-pulse">Loading Profile...</div>
 
     <p v-if="errorMsg" class="text-red-400 text-center mt-4">{{ errorMsg }}</p>
     <p v-if="successMsg" class="text-green-400 text-center mt-4">{{ successMsg }}</p>
 
-    <!-- Profile Image Preview -->
-    <div v-if="previewImageUrl" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-lg max-w-sm w-full text-center text-black shadow-xl">
+    <div v-if="previewImageUrl" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+      <div class="bg-white p-6 rounded-2xl max-w-sm w-full text-center text-black shadow-xl">
         <h2 class="text-xl font-bold mb-4">Preview <span class="text-pink-600">Image</span></h2>
         <img :src="previewImageUrl" alt="Preview"
           class="w-32 h-32 mx-auto object-cover rounded-full border border-gray-300 mb-4" />
         <div class="flex justify-center gap-4">
           <button @click="uploadConfirmed"
-            class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded font-semibold">
+            class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-xl font-semibold transition">
             Upload
           </button>
           <button @click="cancelUpload"
-            class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded font-semibold">
+            class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-xl font-semibold transition">
             Cancel
           </button>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import sidebar from '~/components/sidebar.vue'
-
-// Sidebar hover detection
-const expandSidebar = ref(false)
-onMounted(() => {
-  const sidebarEl = document.querySelector('.fixed.left-0')
-  if (sidebarEl) {
-    sidebarEl.addEventListener('mouseenter', () => expandSidebar.value = true)
-    sidebarEl.addEventListener('mouseleave', () => expandSidebar.value = false)
-  }
-})
 
 const router = useRouter()
 const baseURL = 'http://localhost:5000'
@@ -212,29 +215,58 @@ const fileInput = ref(null)
 const previewImageUrl = ref(null)
 let selectedFile = null
 
-
 // Address
 const newAddress = ref({ name: '', phone: '', address_line: '', district: '', province: '', postal_code: '', is_default: false })
 const isEditing = ref(false)
 const editingIndex = ref(null)
 
-// Cart
-const cartItems = ref(JSON.parse(localStorage.getItem('cart') || '[]'))
+// ✅ Cart Sync Logic
+const cartItems = ref([])
 
-const formatImageUrl = (url) => url ? (url.startsWith('http') ? url : baseURL + url) : '/no-image.png'
-watch(cartItems, val => localStorage.setItem('cart', JSON.stringify(val)), { deep: true })
+const loadCart = () => {
+  if (process.client) {
+    const savedCart = localStorage.getItem("cart")
+    cartItems.value = savedCart ? JSON.parse(savedCart) : []
+  }
+}
+
+// คำนวณราคาทั้งหมด
+const totalPrice = computed(() => cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0))
+const totalItems = computed(() => cartItems.value.reduce((sum, item) => sum + item.quantity, 0))
+
+// เซฟลง LocalStorage ทุกครั้งที่ตะกร้าเปลี่ยน
+watch(cartItems, (newCart) => {
+  localStorage.setItem("cart", JSON.stringify(newCart))
+  window.dispatchEvent(new Event('storage')) // แจ้งเตือน Component อื่นๆ
+}, { deep: true })
+
+const updateQty = (item, change) => {
+  const newQty = item.quantity + change
+  if (newQty >= 1) {
+    item.quantity = newQty
+  }
+}
+
+const removeItem = (item) => {
+  cartItems.value = cartItems.value.filter(i => i.id !== item.id)
+}
 
 // Fetch profile
 onMounted(async () => {
+  loadCart()
   try {
     const token = localStorage.getItem('token')
     if (!token) throw new Error('No token found')
     const res = await axios.get(baseURL + '/api/profile', { headers: { Authorization: `Bearer ${token}` } })
-    if (res.data.profile_image_url && !res.data.profile_image_url.startsWith('http')) res.data.profile_image_url = baseURL + res.data.profile_image_url
+    if (res.data.profile_image_url && !res.data.profile_image_url.startsWith('http')) {
+      res.data.profile_image_url = baseURL + res.data.profile_image_url
+    }
     user.value = res.data
-  } catch (e) { console.error(e); router.push('/login') }
+  } catch (e) { 
+    console.error(e)
+    router.push('/login') 
+  }
 })
-
 
 // Address functions
 const addOrUpdateAddress = async () => {
@@ -247,10 +279,20 @@ const addOrUpdateAddress = async () => {
     user.value.addresses = res.data.addresses
     successMsg.value = isEditing.value ? 'Address updated successfully.' : 'Address added successfully.'
     resetForm()
-  } catch (err) { console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to save address.' }
+  } catch (err) { 
+    console.error(err); 
+    errorMsg.value = err.response?.data?.msg || 'Failed to save address.' 
+  }
 }
-const editAddress = (i) => { newAddress.value = { ...user.value.addresses[i] }; isEditing.value = true; editingIndex.value = i }
+
+const editAddress = (i) => { 
+  newAddress.value = { ...user.value.addresses[i] }
+  isEditing.value = true
+  editingIndex.value = i 
+}
+
 const cancelEdit = () => resetForm()
+
 const deleteAddress = async (i) => {
   if (confirm('Are you sure to delete this address?')) {
     errorMsg.value = ''; successMsg.value = ''
@@ -259,12 +301,20 @@ const deleteAddress = async (i) => {
       const res = await axios.delete(`${baseURL}/api/profile/address/${i}`, { headers: { Authorization: `Bearer ${token}` } })
       user.value.addresses = res.data.addresses
       successMsg.value = 'Address deleted successfully.'
-    } catch (err) { console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to delete address.' }
+    } catch (err) { 
+      console.error(err); 
+      errorMsg.value = err.response?.data?.msg || 'Failed to delete address.' 
+    }
   }
 }
-const resetForm = () => { newAddress.value = { name: '', phone: '', address_line: '', district: '', province: '', postal_code: '', is_default: false }; isEditing.value = false; editingIndex.value = null }
 
-// Profile image
+const resetForm = () => { 
+  newAddress.value = { name: '', phone: '', address_line: '', district: '', province: '', postal_code: '', is_default: false }
+  isEditing.value = false
+  editingIndex.value = null 
+}
+
+// Profile image logic
 const triggerFileInput = () => fileInput.value.click()
 const onFileChange = (e) => {
   const file = e.target.files[0]
@@ -273,35 +323,44 @@ const onFileChange = (e) => {
   selectedFile = file
   previewImageUrl.value = URL.createObjectURL(file)
 }
+
 const uploadConfirmed = async () => {
   errorMsg.value = ''; successMsg.value = ''
   if (!selectedFile) return
-  const formData = new FormData(); formData.append('profile_image', selectedFile)
+  const formData = new FormData()
+  formData.append('profile_image', selectedFile)
   try {
     const token = localStorage.getItem('token')
-    const res = await axios.put(baseURL + '/api/profile/image', formData, { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } })
-    let imageUrl = res.data.profile_image_url; if (imageUrl && !imageUrl.startsWith('http')) imageUrl = baseURL + imageUrl
+    const res = await axios.put(baseURL + '/api/profile/image', formData, { 
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } 
+    })
+    let imageUrl = res.data.profile_image_url
+    if (imageUrl && !imageUrl.startsWith('http')) imageUrl = baseURL + imageUrl
     user.value.profile_image_url = imageUrl
+    
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
     storedUser.profile_image_url = imageUrl
     localStorage.setItem('user', JSON.stringify(storedUser))
+    
     successMsg.value = 'Profile image updated successfully.'
     window.dispatchEvent(new Event('user-updated'))
-  } catch (err) { console.error(err); errorMsg.value = err.response?.data?.msg || 'Failed to update profile image.' }
-  finally { if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value); previewImageUrl.value = null; selectedFile = null }
-}
-const cancelUpload = () => { if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value); previewImageUrl.value = null; selectedFile = null }
-
-// Cart
-const addToCart = (p) => {
-  const ex = cartItems.value.find(i => i.id === p.id)
-  if (ex) ex.quantity += 1
-  else { let img = p.image || '/no-image.png'; if (!img.startsWith('http')) img = baseURL + img; cartItems.value.push({ ...p, image: img, quantity: 1 }) }
+  } catch (err) { 
+    console.error(err); 
+    errorMsg.value = err.response?.data?.msg || 'Failed to update profile image.' 
+  } finally { 
+    if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
+    previewImageUrl.value = null
+    selectedFile = null 
+  }
 }
 
+const cancelUpload = () => { 
+  if (previewImageUrl.value) URL.revokeObjectURL(previewImageUrl.value)
+  previewImageUrl.value = null
+  selectedFile = null 
+}
 
 // Logout
-
 const handleLogout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('username')
@@ -311,8 +370,7 @@ const handleLogout = () => {
   window.dispatchEvent(new Event('user-updated'))
 }
 
-
-// Language
+// Translation
 const currentLanguage = ref('th')
 const t = (key) => {
   const translations = {

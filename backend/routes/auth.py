@@ -361,6 +361,7 @@ def get_wishlist():
                 wishlist_items.append({
                     "id": str(product_ref.id),
                     "name": product_ref.name,
+                    "description": product_ref.description,
                     "price": float(product_ref.price),
                     "image_url": product_ref.image_url,
                     "seller": {
@@ -463,3 +464,58 @@ def check_wishlist(product_id):
 
     return jsonify({"in_wishlist": in_wishlist}), 200
 
+# -----------------------------
+# ✅ Get Cart (ดึงตะกร้าของฉัน)
+# -----------------------------
+@auth.route('/cart', methods=['GET'])
+@jwt_required()
+def get_cart():
+    user_id = get_jwt_identity()
+    # ดึง CartItem ทั้งหมดที่เป็นของ User คนนี้
+    # ใช้ .select_related() เพื่อดึงข้อมูลสินค้า (Product) มาทีเดียวเลย
+    cart_items = CartItem.objects(user=ObjectId(user_id)).select_related()
+    
+    result = []
+    for item in cart_items:
+        p = item.product
+        if p: # เช็คเผื่อสินค้าโดนลบไปแล้ว
+            result.append({
+                "cart_item_id": str(item.id),
+                "id": str(p.id),
+                "name": p.name,
+                "price": float(p.price),
+                "description": p.description,
+                "image_url": p.image_url,
+                "quantity": int(item.quantity),
+                "seller": {
+                    "shop_name": p.seller.shop_name if p.seller else "ร้านค้าทั่วไป"
+                }
+            })
+            
+    return jsonify({"cart": result}), 200
+
+# -----------------------------
+# ✅ Add to Cart (เพิ่ม/อัปเดตจำนวน)
+# -----------------------------
+@auth.route('/cart/add/<product_id>', methods=['POST'])
+@jwt_required()
+def add_to_cart(product_id):
+    user_id = get_jwt_identity()
+    
+    # ตรวจสอบว่ามีสินค้านี้ในตะกร้าของ User คนนี้หรือยัง
+    cart_item = CartItem.objects(user=ObjectId(user_id), product=ObjectId(product_id)).first()
+    
+    if cart_item:
+        # ถ้ามีแล้ว ให้บวกจำนวนเพิ่มไป 1
+        cart_item.quantity = float(cart_item.quantity) + 1
+        cart_item.save()
+    else:
+        # ถ้ายังไม่มี ให้สร้างใหม่
+        new_item = CartItem(
+            user=ObjectId(user_id),
+            product=ObjectId(product_id),
+            quantity=1
+        )
+        new_item.save()
+        
+    return jsonify({"msg": "เพิ่มสินค้าลงตะกร้าแล้ว ✨"}), 200

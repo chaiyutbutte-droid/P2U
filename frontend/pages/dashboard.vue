@@ -4,6 +4,30 @@
     <sidebar />
 
     <main class="p-6">
+      <div class="fixed bottom-8 right-8 z-50">
+  <NuxtLink to="/cart" class="group relative flex items-center justify-center">
+    
+    <div class="absolute inset-0 bg-primary-500 rounded-full blur-xl opacity-40 group-hover:opacity-70 group-hover:scale-125 transition-all duration-500"></div>
+    
+    <button class="relative w-16 h-16 bg-gradient-to-br from-pink-400 to-primary-600 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)] border-2 border-white/30 flex items-center justify-center text-2xl transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12 overflow-hidden">
+      
+      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+      
+      <span class="relative z-10 filter drop-shadow-md">🛒</span>
+    </button>
+
+    <span 
+      v-if="cart.length > 0"
+      class="absolute -top-1 -right-1 bg-white text-primary-600 text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-primary-500 animate-bounce"
+    >
+      {{ cart.reduce((total, item) => total + item.quantity, 0) }}
+    </span>
+    
+    <span class="absolute right-20 bg-dark-800 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-white/10 whitespace-nowrap">
+      ดูตะกร้าสินค้า ✨
+    </span>
+  </NuxtLink>
+</div>
       <!-- Banner Carousel -->
       <div class="relative mb-8 rounded-2xl overflow-hidden shadow-lg">
         <div class="flex transition-transform duration-500" :style="{ transform: `translateX(-${currentBanner * 100}%)` }">
@@ -61,11 +85,12 @@
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               @error="product.image_url = defaultImage"
             />
+            
             <button 
               @click.stop="toggleWishlist(product)"
-              class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-primary-500 transition-colors"
+              class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center text-white hover:bg-red-500 transition-colors"
             >
-              ❤️
+              💖
             </button>
           </div>
           <div class="p-3">
