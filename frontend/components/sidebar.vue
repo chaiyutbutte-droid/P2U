@@ -131,7 +131,7 @@ const menuItems = computed(() => [
   { name: "แจ้งเตือน", icon: "🔔", route: "/notifications" },
   { name: "แชท", icon: "💬", route: "/chat" },
   ...(user.value?.is_seller ? [{ name: "แดชบอร์ดผู้ขาย", icon: "📊", route: "/seller-dashboard" }] : []),
-  { name: "เติมเหรียญ", icon: "🪙", route: "/topup" },
+  { name: "เติมเหรียญ", icon: "💰", route: "/topup" },
 ]);
 
 const isActive = (path) => route.path === path;
