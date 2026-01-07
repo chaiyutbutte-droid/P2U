@@ -30,7 +30,7 @@
           <div v-if="expand" class="text-center">
             <p class="text-sm font-semibold text-white truncate w-full">{{ username }}</p>
             <p v-if="coinBalance !== null" class="text-xs text-primary-400 flex items-center justify-center gap-1 mt-1">
-              <span>🪙</span>
+              <span>💰</span>
               <span>{{ coinBalance.toLocaleString() }} Coins</span>
             </p>
           </div>
