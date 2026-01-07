@@ -2,7 +2,7 @@
   <div class="p-6 md:pl-32 max-w-8xl mx-auto bg-black text-white mt-1 mb-1 mr-1 transition-all duration-300 min-h-screen">
     
     <div class="md:w-full space-y-5"> 
-      <div class="flex items-center  mb-6 relative">
+      <div class="flex items-center justify-center mb-6 relative">
         <h1 class="text-3xl font-extrabold text-center">
           My <span class="text-pink-600">Profile</span>
         </h1>
