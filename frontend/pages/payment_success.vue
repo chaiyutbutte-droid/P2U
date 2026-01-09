@@ -10,7 +10,7 @@
     <!-- ข้อความหลัก -->
     <h1 class="text-3xl font-bold mb-2">ชำระเงินสำเร็จ!</h1>
     <p class="text-lg text-gray-300 mb-6 text-center">
-      ขอบคุณที่ใช้บริการกับเรา<br>
+      ขอบคุณที่ใช้บริการกับเรา<br />
       ระบบได้รับการชำระเงินของคุณเรียบร้อยแล้ว
     </p>
 
@@ -34,14 +34,36 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "PaymentSuccess",
+
+  async mounted() {
+    // สร้างออเดอร์ให้ผู้ขายทันทีหลังชำระเงินสำเร็จ
+    await this.createOrderForSeller();
+  },
+
   methods: {
-    goHome() {
-      this.$router.push("/dashboard"); // กลับไปหน้าแรก
+    async createOrderForSeller() {
+      try {
+        await axios.post("/api/orders", {
+          sellerId: this.$route.query.sellerId, // หรือดึงจาก store
+          items: this.$route.query.items,
+          totalPrice: this.$route.query.total,
+          status: "paid",
+        });
+      } catch (error) {
+        console.error("ส่งออเดอร์ให้ผู้ขายไม่สำเร็จ", error);
+      }
     },
+
+    goHome() {
+      this.$router.push("/dashboard");
+    },
+
     goToOrders() {
-      this.$router.push("/orders"); // ไปหน้าคำสั่งซื้อ ✅
+      this.$router.push("/orders");
     },
   },
 };

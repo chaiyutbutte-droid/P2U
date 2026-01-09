@@ -173,6 +173,7 @@ function getStatusClass(status) {
     processing: 'badge-primary',
     completed: 'badge-success',
     cancelled: 'badge-error',
+    paid: 'badge-primary',
   };
   return classes[status] || 'badge-primary';
 }
@@ -183,9 +184,45 @@ function getStatusLabel(status) {
     processing: '🔄 กำลังดำเนินการ',
     completed: '✓ สำเร็จ',
     cancelled: '✕ ยกเลิก',
+    paid: '💰 ชำระแล้ว',
   };
   return labels[status] || status;
 }
+async function fetchOrders() {
+  const token = localStorage.getItem('token');
+  if (!token || !user.value?.id) return;
+
+  try {
+    const res = await axios.get(
+  `${baseUrl}/api/orders/seller/${user.value.id}`,
+  {
+    headers: { Authorization: `Bearer ${token}` },
+  }
+);
+
+console.log('RAW ORDER RESPONSE 👉', res.data);
+
+
+    // ✅ ตรงนี้คือหัวใจ
+    const orders = res.data.orders || [];
+
+    recentOrders.value = orders.map(order => ({
+      id: order.id,
+      user: order.buyer?.username || 'ไม่ทราบชื่อ',
+      items_count: order.items_count || order.items?.length || 0,
+      total: order.total_price || 0,
+      status: order.status,
+      created_at: order.created_at
+        ? new Date(order.created_at).toLocaleDateString()
+        : '-',
+    }));
+
+    console.log('📦 seller orders:', recentOrders.value);
+  } catch (err) {
+    console.error('ดึงออเดอร์ไม่สำเร็จ:', err);
+  }
+}
+
 
 async function fetchData() {
   const token = localStorage.getItem('token');
@@ -197,26 +234,31 @@ async function fetchData() {
   }
 
   try {
-    // Fetch profile for stats
     const profileRes = await axios.get(`${baseUrl}/api/profile`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
+
     stats.value = {
       total_sales: profileRes.data.total_sales,
       rating_avg: profileRes.data.rating_avg,
       ai_level: profileRes.data.ai_level,
     };
 
-    // Fetch seller's products
     const productsRes = await axios.get(`${baseUrl}/api/products`);
-    products.value = productsRes.data.filter(p => p.seller?.id === user.value?.id);
+    products.value = productsRes.data.filter(
+      p => p.seller?.id === user.value?.id
+    );
     stats.value.total_products = products.value.length;
 
-    // Fetch reviews for seller
     if (user.value?.id) {
-      const reviewsRes = await axios.get(`${baseUrl}/api/reviews/seller/${user.value.id}`);
+      const reviewsRes = await axios.get(
+        `${baseUrl}/api/reviews/seller/${user.value.id}`
+      );
       reviews.value = reviewsRes.data.reviews || [];
     }
+
+    // ✅ ดึงออเดอร์ของ seller
+    await fetchOrders();
   } catch (err) {
     console.error('Failed to fetch seller data:', err);
   }

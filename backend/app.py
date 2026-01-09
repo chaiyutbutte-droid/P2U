@@ -37,6 +37,15 @@ def create_app():
     )
     JWTManager(app)
 
+    # ปรับจากของเดิมเป็นแบบนี้
+    CORS(
+    app,
+    resources={r"/*": {"origins": ["http://localhost:3000"]}}, # เปลี่ยนจาก /api/* เป็น /*
+    supports_credentials=True,
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"] # เพิ่ม headers ที่จำเป็น
+    )
+
     # MongoDB Connection
     connect(
         db=app.config["MONGODB_SETTINGS"]["db"],
