@@ -20,6 +20,7 @@ from models import User, Address
 
 auth = Blueprint('auth', __name__)
 UPLOAD_FOLDER = 'static/uploads'
+"print"
 
 
 # Function to send email
