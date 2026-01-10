@@ -34,6 +34,8 @@
             <p><span class="font-semibold text-pink-400">{{ t('fullName') }}:</span> {{ user.full_name }}</p>
             <p><span class="font-semibold text-pink-400">{{ t('email') }}:</span> {{ user.email }}</p>
             <p><span class="font-semibold text-pink-400">{{ t('phone') }}:</span> {{ user.phone_number }}</p>
+            <p><span class="font-semibold text-indigo-400">Coin (Discount):</span> {{ user.coin_balance }}</p>
+            <p><span class="font-semibold text-pink-400">Token (Auction):</span> {{ user.token_balance }}</p>
           </div>
         </div>
 
@@ -201,13 +203,13 @@
             <div v-if="auctionTab === 'active'" class="space-y-3">
               <div v-if="myAuctions.active?.length" v-for="auction in myAuctions.active" :key="auction.id"
                 class="bg-gray-800 p-4 rounded-xl flex items-center gap-4 hover:bg-gray-700/50 transition-all cursor-pointer"
-                @click="router.push(`/auction`)"
+                @click="router.push(`/auction?id=${auction.id}`)"
               >
                 <img :src="getAuctionImage(auction.image_url)" class="w-16 h-16 object-cover rounded-lg" />
                 <div class="flex-1">
                   <h4 class="font-semibold text-white truncate">{{ auction.title }}</h4>
                   <div class="flex items-center gap-4 mt-1 text-sm">
-                    <span class="text-pink-400 font-bold">฿{{ auction.current_price?.toLocaleString() }}</span>
+                    <span class="text-pink-400 font-bold">{{ auction.current_price?.toLocaleString() }} Token</span>
                     <span class="text-gray-400">{{ auction.total_bids }} ราคา</span>
                   </div>
                 </div>
@@ -223,13 +225,14 @@
             <!-- Ended Auctions -->
             <div v-if="auctionTab === 'ended'" class="space-y-3">
               <div v-if="myAuctions.ended?.length" v-for="auction in myAuctions.ended" :key="auction.id"
-                class="bg-gray-800 p-4 rounded-xl flex items-center gap-4 opacity-70"
+                class="bg-gray-800 p-4 rounded-xl flex items-center gap-4 opacity-70 cursor-pointer hover:opacity-100 transition-all"
+                @click="router.push(`/auction?id=${auction.id}`)"
               >
                 <img :src="getAuctionImage(auction.image_url)" class="w-16 h-16 object-cover rounded-lg grayscale" />
                 <div class="flex-1">
                   <h4 class="font-semibold text-white truncate">{{ auction.title }}</h4>
                   <div class="flex items-center gap-4 mt-1 text-sm">
-                    <span class="text-green-400 font-bold">฿{{ auction.current_price?.toLocaleString() }}</span>
+                    <span class="text-green-400 font-bold">{{ auction.current_price?.toLocaleString() }} Token</span>
                     <span class="text-gray-400">{{ auction.total_bids }} ราคา</span>
                   </div>
                 </div>

@@ -64,12 +64,12 @@ export const useUserStore = defineStore('user', {
       localStorage.removeItem('user')
     },
 
-    // Top-up coin
-    async topupCoin(amount, paymentMethod = 'promptpay', cardToken = null) {
+    // Top-up coin/token
+    async topupCoin(amount, paymentMethod = 'promptpay', cardToken = null, currency = 'coin') {
       if (!this.accessToken) throw new Error('User not logged in')
       this.loading = true
       try {
-        const payload = { amount, payment_method: paymentMethod }
+        const payload = { amount, payment_method: paymentMethod, currency }
         if (paymentMethod === 'credit') payload.card_token = cardToken
 
         // ✅ เปลี่ยน endpoint ให้ตรงกับ backend

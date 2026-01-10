@@ -23,11 +23,15 @@ def create_coin_charge():
 
     data = request.get_json()
     amount = data.get("amount")
+    currency = data.get("currency", "coin") # coin or token
     payment_method = data.get("payment_method", "promptpay")  # 'promptpay' หรือ 'credit'
     card_token = data.get("card_token")  # สำหรับ credit
 
     if not amount or amount <= 0:
         return jsonify({"status": "error", "message": "Invalid amount"}), 400
+    
+    if currency not in ['coin', 'token']:
+        return jsonify({"status": "error", "message": "Invalid currency"}), 400
 
     try:
         if payment_method == "promptpay":
@@ -46,12 +50,13 @@ def create_coin_charge():
 
     charge_data = result["data"]
 
-    # ✅ บันทึกลงฐานข้อมูล
+    # ✅ บันทึกลงฐานข้อมูล (Document)
     transaction = TopupTransaction(
         user=user,
         amount=amount,
+        currency=currency,
         charge_id=charge_data.id,
-        payment_method=payment_method,
+        method=payment_method, # map to model field 'method'
         status=charge_data.status,
         created_at=datetime.utcnow()
     ).save()
@@ -61,6 +66,7 @@ def create_coin_charge():
         "charge_id": charge_data.id,
         "payment_method": payment_method,
         "amount": amount,
+        "currency": currency,
         "charge_data": charge_data
     }), 200
 
@@ -127,7 +133,11 @@ def coin_balance():
     if not user:
         return jsonify({"status": "error", "message": "User not found"}), 404
 
-    return jsonify({"status": "success", "coin_balance": user.coin_balance}), 200
+    return jsonify({
+        "status": "success", 
+        "coin_balance": user.coin_balance,
+        "token_balance": user.token_balance
+    }), 200
 
 # -----------------------------
 # ✅ ดูประวัติการเติมเงิน

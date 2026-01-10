@@ -50,9 +50,10 @@ class User(Document):
     # Wishlist ของผู้ใช้
     wishlist = ListField(ReferenceField('Product'))
 
-    # ===== ระบบ Coin =====
-    coin_balance = IntField(default=0)  # ยอด coin คงเหลือ
-    topup_transactions = ListField(EmbeddedDocumentField(TopupTransaction))
+    # ===== ระบบ Coin และ Token =====
+    coin_balance = IntField(default=0)  # Coin สำหรับส่วนลดสินค้า
+    token_balance = IntField(default=0) # Token สำหรับการประมูล
+    # topup_transactions removed (now using separate collection)
 
     # ===== ฟิลด์สำหรับ AI Ranking =====
     total_sales = FloatField(default=0.0)        # ยอดขายรวม

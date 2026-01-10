@@ -289,6 +289,8 @@ def profile():
         "is_seller": user.is_seller,
         "shop_name": user.shop_name if user.is_seller else None,
         "is_email_verified": user.is_email_verified,
+        "coin_balance": user.coin_balance,
+        "token_balance": user.token_balance,
         "addresses": [
             {
                 "name": addr.name,

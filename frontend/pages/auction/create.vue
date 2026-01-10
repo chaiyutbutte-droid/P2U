@@ -95,7 +95,7 @@
           <!-- Price Section -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-white font-medium mb-2">ราคาเริ่มต้น (฿) *</label>
+              <label class="block text-white font-medium mb-2">ราคาเริ่มต้น (Token) *</label>
               <input 
                 v-model.number="form.starting_price" 
                 type="number" 
@@ -106,7 +106,7 @@
               />
             </div>
             <div>
-              <label class="block text-white font-medium mb-2">ราคาขั้นต่ำที่เพิ่ม (฿)</label>
+              <label class="block text-white font-medium mb-2">ราคาขั้นต่ำที่เพิ่ม (Token)</label>
               <input 
                 v-model.number="form.min_bid_increment" 
                 type="number" 
@@ -150,7 +150,7 @@
                 <h4 class="text-white font-semibold">{{ form.title }}</h4>
                 <p class="text-dark-400 text-sm truncate">{{ form.description || 'ไม่มีรายละเอียด' }}</p>
                 <div class="flex items-center justify-between mt-2">
-                  <span class="text-primary-400 font-bold">฿{{ form.starting_price?.toLocaleString() || 0 }}</span>
+                  <span class="text-primary-400 font-bold">{{ form.starting_price?.toLocaleString() || 0 }} Token</span>
                   <span class="text-dark-500 text-sm">{{ form.duration_hours }} ชม.</span>
                 </div>
               </div>
@@ -210,6 +210,8 @@ const durations = [
   { hours: 168, label: '7 วัน' },
 ];
 
+const imageFile = ref(null);
+
 function triggerFileInput() {
   fileInput.value?.click();
 }
@@ -222,23 +224,8 @@ async function onFileChange(e) {
   if (previewImage.value) URL.revokeObjectURL(previewImage.value);
   previewImage.value = URL.createObjectURL(file);
   
-  // Upload image
-  const token = localStorage.getItem('token');
-  const formData = new FormData();
-  formData.append('image', file);
-  
-  try {
-    const res = await axios.post(`${baseUrl}/api/seller/upload-product-image`, formData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-    form.value.image_url = res.data.image_url;
-  } catch (err) {
-    console.error('Failed to upload image:', err);
-    // Use preview URL as fallback
-  }
+  // Store file for later upload
+  imageFile.value = file;
 }
 
 async function createAuction() {
@@ -257,21 +244,29 @@ async function createAuction() {
   isLoading.value = true;
   
   try {
-    const res = await axios.post(`${baseUrl}/api/auctions`, {
-      title: form.value.title,
-      description: form.value.description,
-      category: form.value.category,
-      starting_price: form.value.starting_price,
-      min_bid_increment: form.value.min_bid_increment || 100,
-      duration_hours: form.value.duration_hours,
-      image_url: form.value.image_url || '/default-product.png'
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
+    const formData = new FormData();
+    formData.append('title', form.value.title);
+    formData.append('description', form.value.description);
+    formData.append('category', form.value.category);
+    formData.append('starting_price', form.value.starting_price);
+    formData.append('min_bid_increment', form.value.min_bid_increment || 100);
+    formData.append('duration_hours', form.value.duration_hours);
+    
+    if (imageFile.value) {
+      formData.append('image', imageFile.value);
+    }
+
+    const res = await axios.post(`${baseUrl}/api/auctions`, formData, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data'
+      }
     });
     
     alert('🎉 สร้างการประมูลสำเร็จ!');
     router.push('/auction');
   } catch (err) {
+    console.error(err);
     alert(err.response?.data?.msg || 'สร้างการประมูลไม่สำเร็จ');
   } finally {
     isLoading.value = false;

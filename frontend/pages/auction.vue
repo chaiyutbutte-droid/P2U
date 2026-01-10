@@ -64,7 +64,7 @@
             <div class="flex items-end justify-between mt-4">
               <div>
                 <p class="text-dark-400 text-xs">ราคาปัจจุบัน</p>
-                <p class="text-2xl font-bold text-primary-400">฿{{ auction.current_price.toLocaleString() }}</p>
+                <p class="text-2xl font-bold text-primary-400">{{ auction.current_price.toLocaleString() }} Token</p>
               </div>
               <button class="btn-primary px-4 py-2 text-sm">
                 ประมูลเลย
@@ -102,14 +102,29 @@
                   <!-- Time Left -->
                   <div class="glass-light rounded-xl p-4 mb-4 text-center">
                     <p class="text-dark-400 text-sm">เหลือเวลา</p>
-                    <p class="text-2xl font-bold text-red-400">{{ formatTimeDetailed(selectedAuction.time_left) }}</p>
+                    <p class="text-2xl font-bold" :class="selectedAuction.time_left > 0 ? 'text-red-400' : 'text-dark-300'">
+                      {{ formatTimeDetailed(selectedAuction.time_left) }}
+                    </p>
                   </div>
                   
+                  <!-- Winner Section (If Ended) -->
+                  <div v-if="selectedAuction.is_ended || selectedAuction.time_left <= 0" class="glass-light rounded-xl p-4 mb-4 border border-yellow-500/30 bg-yellow-500/10 text-center">
+                    <p class="text-yellow-400 font-bold text-lg mb-2">🏆 การประมูลสิ้นสุดแล้ว</p>
+                    <div v-if="selectedAuction.winner" class="flex flex-col items-center">
+                      <p class="text-dark-300 text-sm">ผู้ชนะคือ</p>
+                      <p class="text-2xl font-bold text-white mt-1">{{ selectedAuction.winner.username }}</p>
+                      <p class="text-primary-400 font-bold mt-1">จบที่ราคา {{ selectedAuction.current_price.toLocaleString() }} Token</p>
+                    </div>
+                    <div v-else>
+                      <p class="text-dark-400">ไม่มีผู้ชนะการประมูล</p>
+                    </div>
+                  </div>
+
                   <!-- Current Price -->
                   <div class="glass-light rounded-xl p-4 mb-4">
                     <div class="flex justify-between items-center">
                       <span class="text-dark-400">ราคาปัจจุบัน</span>
-                      <span class="text-3xl font-bold text-primary-400">฿{{ selectedAuction.current_price?.toLocaleString() }}</span>
+                      <span class="text-3xl font-bold text-primary-400">{{ selectedAuction.current_price?.toLocaleString() }} Token</span>
                     </div>
                     <div class="flex justify-between items-center mt-2">
                       <span class="text-dark-400 text-sm">จำนวนราคา</span>
@@ -118,8 +133,8 @@
                   </div>
                   
                   <!-- Bid Input -->
-                  <div class="mb-4">
-                    <label class="text-dark-300 text-sm mb-2 block">ใส่ราคาของคุณ (ขั้นต่ำ ฿{{ minBid.toLocaleString() }})</label>
+                  <div v-if="!selectedAuction.is_ended && selectedAuction.time_left > 0" class="mb-4">
+                    <label class="text-dark-300 text-sm mb-2 block">ใส่ราคาของคุณ (ขั้นต่ำ {{ minBid.toLocaleString() }} Token)</label>
                     <input 
                       v-model.number="bidAmount" 
                       type="number" 
@@ -131,6 +146,7 @@
                   </div>
                   
                   <button 
+                    v-if="!selectedAuction.is_ended && selectedAuction.time_left > 0"
                     @click="placeBid" 
                     :disabled="bidAmount < minBid || isLoading"
                     class="btn-primary w-full py-4 text-lg font-bold disabled:opacity-50"
@@ -139,7 +155,7 @@
                   </button>
                   
                   <!-- Auto-Bid Section -->
-                  <div class="mt-4 glass-light rounded-xl p-4">
+                  <div v-if="!selectedAuction.is_ended && selectedAuction.time_left > 0" class="mt-4 glass-light rounded-xl p-4">
                     <div class="flex items-center justify-between mb-3">
                       <div class="flex items-center gap-2">
                         <span class="text-lg">🤖</span>
@@ -152,7 +168,7 @@
                     <div v-if="myAutoBid" class="space-y-2">
                       <div class="flex justify-between text-sm">
                         <span class="text-dark-400">ราคาสูงสุด</span>
-                        <span class="text-primary-400 font-bold">฿{{ myAutoBid.max_amount?.toLocaleString() }}</span>
+                        <span class="text-primary-400 font-bold">{{ myAutoBid.max_amount?.toLocaleString() }} Token</span>
                       </div>
                       <div class="flex gap-2">
                         <button @click="showAutoBidModal = true" class="flex-1 py-2 bg-dark-700 hover:bg-dark-600 rounded-lg text-sm text-white transition">
@@ -204,7 +220,7 @@
                         
                         <!-- Bid Amount -->
                         <div class="text-right">
-                          <p class="text-primary-400 font-bold">฿{{ bid.amount?.toLocaleString() }}</p>
+                          <p class="text-primary-400 font-bold">{{ bid.amount?.toLocaleString() }} Token</p>
                           <p v-if="bid.is_highest" class="text-green-400 text-xs">👑 เสนอสูงสุด</p>
                         </div>
                       </div>
@@ -239,24 +255,24 @@
               </p>
               
               <div class="mb-4">
-                <label class="text-dark-300 text-sm mb-2 block">ราคาสูงสุดที่ต้องการ (฿)</label>
+                <label class="text-dark-300 text-sm mb-2 block">ราคาสูงสุดที่ต้องการ (Token)</label>
                 <input 
                   v-model.number="autoBidAmount" 
                   type="number" 
                   :min="minBid"
                   class="w-full input-glass text-xl font-bold"
-                  :placeholder="`ขั้นต่ำ ฿${minBid.toLocaleString()}`"
+                  :placeholder="`ขั้นต่ำ ${minBid.toLocaleString()} Token`"
                 />
               </div>
               
               <div class="glass-light rounded-lg p-3 mb-4">
                 <div class="flex justify-between text-sm">
                   <span class="text-dark-400">ราคาปัจจุบัน</span>
-                  <span class="text-white">฿{{ selectedAuction?.current_price?.toLocaleString() }}</span>
+                  <span class="text-white">{{ selectedAuction?.current_price?.toLocaleString() }} Token</span>
                 </div>
                 <div class="flex justify-between text-sm mt-1">
                   <span class="text-dark-400">ราคาขั้นต่ำถัดไป</span>
-                  <span class="text-primary-400">฿{{ minBid.toLocaleString() }}</span>
+                  <span class="text-primary-400">{{ minBid.toLocaleString() }} Token</span>
                 </div>
               </div>
               
@@ -278,7 +294,12 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
+import { useRoute, useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 
+const userStore = useUserStore();
+const route = useRoute();
+const router = useRouter();
 const auctions = ref([]);
 const selectedAuction = ref(null);
 const selectedCategory = ref('all');
@@ -368,6 +389,7 @@ function closeAuction() {
   selectedAuction.value = null;
   bidHistory.value = [];
   myAutoBid.value = null;
+  router.replace({ path: '/auction' });
 }
 
 async function placeBid() {
@@ -378,7 +400,7 @@ async function placeBid() {
   }
   
   if (bidAmount.value < minBid.value) {
-    alert(`ราคาต้องไม่น้อยกว่า ฿${minBid.value.toLocaleString()}`);
+    alert(`ราคาต้องไม่น้อยกว่า ${minBid.value.toLocaleString()} Token`);
     return;
   }
   
@@ -432,7 +454,7 @@ async function setAutoBid() {
   }
   
   if (autoBidAmount.value < minBid.value) {
-    alert(`ราคาสูงสุดต้องไม่น้อยกว่า ฿${minBid.value.toLocaleString()}`);
+    alert(`ราคาสูงสุดต้องไม่น้อยกว่า ${minBid.value.toLocaleString()} Token`);
     return;
   }
   
@@ -483,11 +505,53 @@ async function cancelAutoBid() {
   }
 }
 
+async function refreshSelectedAuction() {
+  if (!selectedAuction.value) return;
+  try {
+    const res = await axios.get(`${baseUrl}/api/auctions/${selectedAuction.value.id}`);
+    const newData = res.data;
+    
+    // Preserve some local state if needed, but here we just update
+    // We update the reactive object properties
+    selectedAuction.value.current_price = newData.current_price;
+    selectedAuction.value.total_bids = newData.total_bids;
+    selectedAuction.value.time_left = newData.time_left;
+    selectedAuction.value.is_ended = newData.is_ended;
+    selectedAuction.value.winner = newData.winner;
+    
+    bidHistory.value = newData.bid_history || [];
+    
+    // Update bid input if below minimum
+    const min = newData.current_price + newData.min_bid_increment;
+    if (bidAmount.value < min) {
+      bidAmount.value = min;
+    }
+    
+    // Also update auto bid amount input if below minimum
+    if (autoBidAmount.value < min) {
+      autoBidAmount.value = min;
+    }
+    
+    // Refresh auto-bid status occasionally or if needed
+    // await fetchMyAutoBid(selectedAuction.value.id);
+    
+  } catch (err) {
+    console.error('Failed to refresh auction:', err);
+  }
+}
+
 // Timer to update time_left
 let timer = null;
+let pollingTimer = null;
 
-onMounted(() => {
-  fetchAuctions();
+onMounted(async () => {
+  await fetchAuctions();
+  
+  // Check for query param to open specific auction
+  if (route.query.id) {
+    openAuction({ id: route.query.id });
+  }
+
   // Seed auctions if empty
   axios.post(`${baseUrl}/api/auctions/seed`).catch(() => {});
   
@@ -505,10 +569,17 @@ onMounted(() => {
       selectedAuction.value.time_left = Math.max(0, selectedAuction.value.time_left - 1);
     }
   }, 1000);
+
+  // Polling for updates
+  pollingTimer = setInterval(() => {
+    fetchAuctions();
+    refreshSelectedAuction();
+  }, 3000);
 });
 
 onBeforeUnmount(() => {
   if (timer) clearInterval(timer);
+  if (pollingTimer) clearInterval(pollingTimer);
 });
 </script>
 

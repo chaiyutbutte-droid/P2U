@@ -4,6 +4,7 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 
 from models import User, Auction, AuctionBid, Notification, AutoBid
+from utils.file_upload import save_image
 
 auction = Blueprint('auction', __name__)
 
@@ -146,8 +147,12 @@ def place_bid(auction_id):
     
     min_bid = float(a.current_price) + float(a.min_bid_increment)
     if bid_amount < min_bid:
-        return jsonify({"msg": f"ราคาต้องไม่น้อยกว่า ฿{min_bid:,.0f}"}), 400
+        return jsonify({"msg": f"ราคาต้องไม่น้อยกว่า {min_bid:,.0f} Token"}), 400
     
+    # Check Token Balance
+    if user.token_balance < bid_amount:
+        return jsonify({"msg": f"Token ไม่พอ! (มี {user.token_balance}, ต้องการ {bid_amount})"}), 400
+
     # Create bid
     new_bid = AuctionBid(
         auction=a,
@@ -155,6 +160,22 @@ def place_bid(auction_id):
         amount=bid_amount
     )
     new_bid.save()
+    
+    # Handle Token Transaction
+    # 1. Refund previous winner
+    if a.winner:
+        prev_winner = a.winner
+        # Find their last bid amount to refund? 
+        # Actually, we should refund the 'current_price' or their actual bid amount?
+        # In this system, current_price IS the winning bid amount.
+        # So refund current_price to prev_winner.
+        if str(prev_winner.id) != user_id: # Don't refund if outbidding oneself (rare but possible)
+             prev_winner.token_balance += int(a.current_price)
+             prev_winner.save()
+    
+    # 2. Deduct from new bidder
+    user.token_balance -= int(bid_amount)
+    user.save()
     
     # Update auction
     a.current_price = bid_amount
@@ -168,16 +189,20 @@ def place_bid(auction_id):
         Notification(
             user=previous_bids.bidder,
             title="⚠️ มีคนเสนอราคาสูงกว่า!",
-            message=f"มีคนเสนอราคา ฿{bid_amount:,.0f} สำหรับ '{a.title}'",
+            message=f"มีคนเสนอราคา {bid_amount:,.0f} Token สำหรับ '{a.title}'",
             type="order",
             link=f"/auctions/{auction_id}"
         ).save()
+
+    # Process Auto-Bids
+    process_auto_bids(a)
     
     return jsonify({
         "msg": "ประมูลสำเร็จ!",
         "current_price": float(a.current_price),
         "total_bids": a.total_bids,
-        "your_bid": bid_amount
+        "your_bid": bid_amount,
+        "token_balance": user.token_balance
     }), 200
 
 
@@ -194,11 +219,18 @@ def create_auction():
     if not user or not user.is_seller:
         return jsonify({"msg": "เฉพาะผู้ขายเท่านั้นที่สามารถสร้างการประมูลได้"}), 403
     
-    data = request.get_json()
+    image_url = None
+    if request.content_type and 'multipart/form-data' in request.content_type:
+        data = request.form
+        if 'image' in request.files:
+            image_url = save_image(request.files['image'])
+    else:
+        data = request.get_json() or {}
+        image_url = data.get('image_url')
     
     title = data.get('title')
     description = data.get('description', '')
-    image_url = data.get('image_url')
+    # image_url already set
     category = data.get('category', 'all')
     starting_price = float(data.get('starting_price', 0))
     duration_hours = int(data.get('duration_hours', 24))  # Default 24 hours
@@ -243,7 +275,7 @@ def end_auction(auction):
         Notification(
             user=auction.winner,
             title="🎉 คุณชนะการประมูล!",
-            message=f"คุณชนะการประมูล '{auction.title}' ในราคา ฿{float(auction.current_price):,.0f}",
+            message=f"คุณชนะการประมูล '{auction.title}' ในราคา {float(auction.current_price):,.0f} Token",
             type="order",
             link=f"/auctions/{str(auction.id)}"
         ).save()
@@ -252,7 +284,7 @@ def end_auction(auction):
         Notification(
             user=auction.seller,
             title="🔨 การประมูลสิ้นสุด",
-            message=f"'{auction.title}' ขายได้ในราคา ฿{float(auction.current_price):,.0f}",
+            message=f"'{auction.title}' ขายได้ในราคา {float(auction.current_price):,.0f} Token",
             type="order",
             link=f"/auctions/{str(auction.id)}"
         ).save()
@@ -582,41 +614,87 @@ def process_auto_bids(auction):
     if auction.is_ended:
         return
     
-    # Get all active auto-bids, sorted by max_amount (highest first)
-    auto_bids = AutoBid.objects(auction=auction, is_active=True).order_by('-max_amount')
-    
-    if len(auto_bids) < 1:
-        return
+    # Get all active auto-bids
+    auto_bids = AutoBid.objects(auction=auction, is_active=True)
     
     current_price = float(auction.current_price)
     increment = float(auction.min_bid_increment)
+    min_next_bid = current_price + increment
     
-    # If only one auto-bidder, bid minimum
-    if len(auto_bids) == 1:
-        ab = auto_bids[0]
-        if float(ab.max_amount) > current_price:
-            new_price = current_price + increment
-            if new_price <= float(ab.max_amount):
-                place_auto_bid(auction, ab.user, new_price)
-                ab.current_bid = new_price
-                ab.save()
+    # Filter valid auto-bids (must be able to afford next bid, or be current winner)
+    valid_bids = []
+    for ab in auto_bids:
+        # Reload user to get fresh balance
+        ab.user.reload()
+        
+        is_winner = auction.winner and str(auction.winner.id) == str(ab.user.id)
+        if is_winner:
+            valid_bids.append(ab)
+        elif float(ab.max_amount) >= min_next_bid and ab.user.token_balance >= min_next_bid:
+            valid_bids.append(ab)
+    
+    if not valid_bids:
         return
     
-    # Multiple auto-bidders: compete
-    highest = auto_bids[0]
-    second = auto_bids[1]
+    # Sort by max_amount descending
+    valid_bids.sort(key=lambda x: float(x.max_amount), reverse=True)
     
-    # New price beats second highest by one increment
-    new_price = min(float(highest.max_amount), float(second.max_amount) + increment)
+    highest = valid_bids[0]
     
-    if new_price > current_price:
+    # Case 1: Single valid auto-bidder
+    if len(valid_bids) == 1:
+        # If already winner, do nothing
+        if auction.winner and str(auction.winner.id) == str(highest.user.id):
+            return
+            
+        # If not winner, bid next increment
+        new_price = min(float(highest.max_amount), min_next_bid)
+        
+        # Cap at token balance
+        if new_price > highest.user.token_balance:
+            new_price = highest.user.token_balance
+            
         place_auto_bid(auction, highest.user, new_price)
         highest.current_bid = new_price
         highest.save()
+        return
+    
+    # Case 2: Multiple valid auto-bidders
+    second = valid_bids[1]
+    
+    # Price should jump to second highest max + increment
+    # But cannot exceed highest max
+    target_price = float(second.max_amount) + increment
+    final_price = min(target_price, float(highest.max_amount))
+    
+    # Cap at token balance
+    if final_price > highest.user.token_balance:
+        final_price = highest.user.token_balance
+    
+    # If current price is already higher (e.g. via manual bid), just ensure highest is winning
+    if final_price <= current_price:
+        if auction.winner and str(auction.winner.id) == str(highest.user.id):
+            return
+        # If highest is not winning, they should bid next increment
+        final_price = current_price + increment
+        if final_price > float(highest.max_amount):
+            return # Cannot afford
+            
+    place_auto_bid(auction, highest.user, final_price)
+    highest.current_bid = final_price
+    highest.save()
 
 
 def place_auto_bid(auction, user, amount):
     """Place an auto-bid"""
+    # Double check balance
+    if user.token_balance < amount:
+        return
+
+    # Capture old state
+    old_price = auction.current_price
+    old_winner = auction.winner
+
     new_bid = AuctionBid(
         auction=auction,
         bidder=user,
@@ -625,18 +703,27 @@ def place_auto_bid(auction, user, amount):
     new_bid.save()
     
     # Update auction
-    old_winner = auction.winner
     auction.current_price = amount
     auction.total_bids += 1
     auction.winner = user
     auction.save()
+    
+    # Handle Token Transaction
+    # 1. Refund previous winner
+    if old_winner and str(old_winner.id) != str(user.id):
+        old_winner.token_balance += int(old_price)
+        old_winner.save()
+
+    # 2. Deduct from new winner
+    user.token_balance -= int(amount)
+    user.save()
     
     # Notify previous winner if different
     if old_winner and str(old_winner.id) != str(user.id):
         Notification(
             user=old_winner,
             title="⚠️ Auto-Bid: มีคนเสนอราคาสูงกว่า!",
-            message=f"มีคนเสนอราคา ฿{amount:,.0f} สำหรับ '{auction.title}'",
+            message=f"มีคนเสนอราคา {amount:,.0f} Token สำหรับ '{auction.title}'",
             type="order",
             link=f"/auctions/{str(auction.id)}"
         ).save()

@@ -1,12 +1,33 @@
 <template>
   <div class="min-h-screen bg-gray-900 text-white p-8">
-    <h1 class="text-2xl font-bold mb-6">💰 Top-up Coins</h1>
+    <h1 class="text-2xl font-bold mb-6">💰 Top-up</h1>
 
     <div class="bg-gray-800 p-6 rounded-lg max-w-md mx-auto space-y-4">
-      <!-- แสดงยอด Coin ปัจจุบัน -->
+      
+      <!-- Currency Selection -->
+      <div class="flex space-x-2 mb-4">
+        <button 
+          @click="currency = 'coin'"
+          class="flex-1 py-2 rounded font-bold transition-colors"
+          :class="currency === 'coin' ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'"
+        >
+          Coin (Discount)
+        </button>
+        <button 
+          @click="currency = 'token'"
+          class="flex-1 py-2 rounded font-bold transition-colors"
+          :class="currency === 'token' ? 'bg-pink-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'"
+        >
+          Token (Auction)
+        </button>
+      </div>
+
+      <!-- แสดงยอดปัจจุบัน -->
       <p class="text-gray-300">
-        Your current coin balance: 
-        <span class="font-bold text-indigo-400">{{ userStore.coinBalance }}</span> coins
+        Your current {{ currency }} balance: 
+        <span class="font-bold" :class="currency === 'coin' ? 'text-indigo-400' : 'text-pink-400'">
+          {{ currency === 'coin' ? userStore.coinBalance : userStore.tokenBalance }}
+        </span>
       </p>
 
       <!-- กรอกจำนวนเงิน -->
@@ -63,8 +84,8 @@ const createTopup = async () => {
   qrData.value = null;
 
   try {
-    // เรียก action topupCoin ใน store (ต้องสร้างใน userStore)
-    const res = await userStore.topupCoin(amount.value);
+    // เรียก action topupCoin ใน store
+    const res = await userStore.topupCoin(amount.value, 'promptpay', null, currency.value);
 
     // ตัวอย่าง response: { qr_url: "...", amount: 100 }
     qrData.value = res;

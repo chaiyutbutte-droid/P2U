@@ -59,8 +59,8 @@
           <div class="flex-1">
             <h3 class="text-white font-semibold">{{ auction.title }}</h3>
             <div class="flex items-center gap-4 mt-2 text-sm">
-              <span class="text-dark-400">ราคาปัจจุบัน: <span class="text-primary-400 font-bold">฿{{ auction.current_price.toLocaleString() }}</span></span>
-              <span class="text-dark-400">เสนอสูงสุด: <span class="text-accent-400">฿{{ auction.my_highest_bid.toLocaleString() }}</span></span>
+              <span class="text-dark-400">ราคาปัจจุบัน: <span class="text-primary-400 font-bold">{{ auction.current_price.toLocaleString() }} Token</span></span>
+              <span class="text-dark-400">เสนอสูงสุด: <span class="text-accent-400">{{ auction.my_highest_bid.toLocaleString() }} Token</span></span>
             </div>
           </div>
           <div class="text-right">
@@ -84,9 +84,9 @@
               <h3 class="text-white font-semibold">{{ auction.title }}</h3>
               <span class="text-green-400 text-xl">🎉</span>
             </div>
-            <p class="text-dark-400 text-sm mt-1">ราคาที่ชนะ: <span class="text-green-400 font-bold">฿{{ auction.current_price.toLocaleString() }}</span></p>
+            <p class="text-dark-400 text-sm mt-1">ราคาที่ชนะ: <span class="text-green-400 font-bold">{{ auction.current_price.toLocaleString() }} Token</span></p>
           </div>
-          <NuxtLink :to="`/auction/${auction.id}`" class="btn-primary px-4 py-2 text-sm">
+          <NuxtLink :to="`/auction?id=${auction.id}`" class="btn-primary px-4 py-2 text-sm">
             ดูรายละเอียด
           </NuxtLink>
         </div>
@@ -107,9 +107,9 @@
           <div class="flex-1">
             <h3 class="text-white font-semibold">{{ auction.title }}</h3>
             <div class="text-sm mt-1">
-              <span class="text-dark-400">ราคาสุดท้าย: ฿{{ auction.current_price.toLocaleString() }}</span>
+              <span class="text-dark-400">ราคาสุดท้าย: {{ auction.current_price.toLocaleString() }} Token</span>
               <span class="text-dark-500 mx-2">|</span>
-              <span class="text-dark-400">เสนอสูงสุดของคุณ: ฿{{ auction.my_highest_bid.toLocaleString() }}</span>
+              <span class="text-dark-400">เสนอสูงสุดของคุณ: {{ auction.my_highest_bid.toLocaleString() }} Token</span>
             </div>
           </div>
           <span class="text-red-400 text-sm">แพ้</span>
@@ -131,8 +131,8 @@
             <div class="flex-1">
               <h4 class="text-white font-medium">{{ ab.auction_title }}</h4>
               <div class="flex items-center gap-4 text-sm mt-1">
-                <span class="text-dark-400">ตั้งไว้สูงสุด: <span class="text-primary-400 font-bold">฿{{ ab.max_amount.toLocaleString() }}</span></span>
-                <span class="text-dark-400">ราคาปัจจุบัน: ฿{{ ab.current_price.toLocaleString() }}</span>
+                <span class="text-dark-400">ตั้งไว้สูงสุด: <span class="text-primary-400 font-bold">{{ ab.max_amount.toLocaleString() }} Token</span></span>
+                <span class="text-dark-400">ราคาปัจจุบัน: {{ ab.current_price.toLocaleString() }} Token</span>
               </div>
             </div>
             <div class="text-right">
@@ -188,7 +188,7 @@ function formatTime(seconds) {
 }
 
 function goToAuction(id) {
-  router.push(`/auction`);
+  router.push(`/auction?id=${id}`);
 }
 
 async function fetchHistory() {
