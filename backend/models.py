@@ -48,6 +48,7 @@ class User(Document):
 
     # ===== ระบบ Coin =====
     coin_balance = IntField(default=0)
+    token_balance = IntField(default=0)  # เพิ่ม field นี้เพื่อให้ตรงกับ DB
     topup_transactions = ListField(EmbeddedDocumentField(TopupTransaction))
 
     # ===== ฟิลด์สำหรับ AI Ranking =====
