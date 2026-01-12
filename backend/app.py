@@ -22,6 +22,7 @@ from routes.gamification import gamification
 from routes.recommendations import recommendations
 from routes.auction import auction
 from routes.price_analysis import price_analysis
+from routes.token import token_bp
 
 def create_app():
     app = Flask(__name__)
@@ -63,6 +64,7 @@ def create_app():
     app.register_blueprint(recommendations, url_prefix="/api")
     app.register_blueprint(auction, url_prefix="/api")
     app.register_blueprint(price_analysis, url_prefix="/api")
+    app.register_blueprint(token_bp, url_prefix="/api")
 
     # --- Static File Routes ---
     @app.route('/static/uploads/<path:filename>')
